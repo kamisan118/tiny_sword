@@ -19,8 +19,8 @@ export default class HUD {
         // --- Center: Wave display ---
         scene.add.image(640, 28, 'ui_ribbon_yellow').setScale(1.3, 0.85)
             .setScrollFactor(0).setDepth(999);
-        this.waveText = scene.add.text(640, 22, 'Wave 0', { ...style, fontSize: '18px' })
-            .setOrigin(0.5, 0).setScrollFactor(0).setDepth(1000);
+        this.waveText = scene.add.text(640, 24, 'Wave 0', { ...style, fontSize: '18px' })
+            .setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(1000);
 
         // --- Right: Timer display ---
         scene.add.image(1172, 30, 'ui_carved').setScale(1.15, 0.8)
