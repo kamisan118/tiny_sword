@@ -5,24 +5,32 @@ export default class HUD {
         this.scene = scene;
         this.eventBus = eventBus;
 
-        const style = { fontSize: '18px', color: '#ffffff', fontFamily: 'Arial',
-                        stroke: '#000000', strokeThickness: 3 };
+        const style = { fontSize: '16px', color: '#fef3c0', fontFamily: 'Arial',
+                        stroke: '#3a2a14', strokeThickness: 3 };
 
-        // Gold display (top-left)
-        this.goldIcon = scene.add.image(40, 24, 'gold_icon').setScale(0.25).setScrollFactor(0).setDepth(1000);
-        this.goldText = scene.add.text(60, 14, 'Gold: 100', style).setScrollFactor(0).setDepth(1000);
+        // --- Left: Gold display ---
+        scene.add.image(108, 30, 'ui_carved').setScale(1.15, 0.8)
+            .setScrollFactor(0).setDepth(999);
+        scene.add.image(30, 30, 'ui_icon_coin').setScale(0.5)
+            .setScrollFactor(0).setDepth(1000);
+        this.goldText = scene.add.text(58, 21, '100', style)
+            .setScrollFactor(0).setDepth(1000);
 
-        // Wave display (top-center)
-        this.waveText = scene.add.text(GAME_WIDTH / 2, 14, 'Wave 0', style)
+        // --- Center: Wave display ---
+        scene.add.image(640, 28, 'ui_ribbon_yellow').setScale(1.3, 0.85)
+            .setScrollFactor(0).setDepth(999);
+        this.waveText = scene.add.text(640, 22, 'Wave 0', { ...style, fontSize: '18px' })
             .setOrigin(0.5, 0).setScrollFactor(0).setDepth(1000);
 
-        // Timer display (top-right)
-        this.timerText = scene.add.text(GAME_WIDTH - 20, 14, 'Next wave: 60s', style)
+        // --- Right: Timer display ---
+        scene.add.image(1172, 30, 'ui_carved').setScale(1.15, 0.8)
+            .setScrollFactor(0).setDepth(999);
+        this.timerText = scene.add.text(1245, 21, 'Next wave: 60s', style)
             .setOrigin(1, 0).setScrollFactor(0).setDepth(1000);
 
         // Listen for gold changes
         eventBus.on('goldChanged', (gold) => {
-            this.goldText.setText(`Gold: ${gold}`);
+            this.goldText.setText(`${gold}`);
         });
 
         // Listen for wave changes
@@ -34,8 +42,10 @@ export default class HUD {
     updateTimer(seconds) {
         if (seconds <= 0) {
             this.timerText.setText('Wave incoming!');
+            this.timerText.setColor('#ff6644');
         } else {
             this.timerText.setText(`Next wave: ${Math.ceil(seconds)}s`);
+            this.timerText.setColor('#fef3c0');
         }
     }
 

@@ -7,6 +7,7 @@ const BLUE_BUILDINGS = 'assets/Buildings/Blue Buildings';
 const RESOURCES = 'assets/Resources';
 const TERRAIN = 'assets/Terrain';
 const EFFECTS = 'assets/Effects';
+const UI = 'assets/UI Elements';
 
 // Spritesheet definitions: { key, path, frameWidth, frameHeight }
 export const spritesheets = [
@@ -53,4 +54,17 @@ export const images = [
 
     // --- Terrain ---
     { key: 'water',                path: `${TERRAIN}/Water/Water.png` },
+
+    // --- UI Elements ---
+    { key: 'ui_carved',           path: `${UI}/Banners/Carved_3Slides.png` },
+    { key: 'ui_ribbon_yellow',    path: `${UI}/Ribbons/Ribbon_Yellow_3Slides.png` },
+    { key: 'ui_banner_h',         path: `${UI}/Banners/Banner_Horizontal.png` },
+    { key: 'ui_btn_blue',         path: `${UI}/Buttons/Button_Blue_3Slides.png` },
+    { key: 'ui_btn_blue_pressed', path: `${UI}/Buttons/Button_Blue_3Slides_Pressed.png` },
+    { key: 'ui_btn_disable',      path: `${UI}/Buttons/Button_Disable_3Slides.png` },
+    { key: 'ui_btn_hover',        path: `${UI}/Buttons/Button_Hover_3Slides.png` },
+    { key: 'ui_bar_base',         path: `${UI}/UI Elements/Bars/SmallBar_Base.png` },
+    { key: 'ui_bar_fill',         path: `${UI}/UI Elements/Bars/SmallBar_Fill.png` },
+    { key: 'ui_icon_coin',        path: `${UI}/UI Elements/Icons/Icon_03.png` },
+    { key: 'ui_icon_sword',       path: `${UI}/UI Elements/Icons/Icon_05.png` },
 ];

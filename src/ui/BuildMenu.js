@@ -4,30 +4,56 @@ export default class BuildMenu {
     constructor(scene) {
         this.scene = scene;
 
-        // Bottom panel background
-        const panelY = GAME_HEIGHT - 50;
-        this.panel = scene.add.rectangle(GAME_WIDTH / 2, panelY, 300, 60, 0x000000, 0.6)
-            .setScrollFactor(0).setDepth(900);
+        const panelX = 640;
+        const panelY = GAME_HEIGHT - 55;
 
-        // Barracks button
-        const btnX = GAME_WIDTH / 2;
-        this.barracksBtn = scene.add.image(btnX - 40, panelY, 'barracks')
-            .setScale(0.2).setScrollFactor(0).setDepth(901).setInteractive();
+        const style = { fontSize: '14px', color: '#fef3c0', fontFamily: 'Arial',
+                        stroke: '#3a2a14', strokeThickness: 3 };
 
-        const style = { fontSize: '14px', color: '#ffffff', fontFamily: 'Arial',
-                        stroke: '#000000', strokeThickness: 2 };
-        this.barracksLabel = scene.add.text(btnX + 10, panelY - 10, `Barracks`, style)
-            .setScrollFactor(0).setDepth(901);
-        this.barracksCost = scene.add.text(btnX + 10, panelY + 6, `${BARRACKS_COST} gold`, { ...style, fontSize: '12px', color: '#ffdd44' })
-            .setScrollFactor(0).setDepth(901);
+        // Panel background
+        this.panelBg = scene.add.image(panelX, panelY, 'ui_banner_h').setScale(1.82, 0.47)
+            .setScrollFactor(0).setDepth(899);
 
-        // Click handler
-        this.barracksBtn.on('pointerdown', () => {
+        // Barracks icon
+        this.barracksIcon = scene.add.image(panelX - 100, panelY, 'barracks')
+            .setScale(0.22).setScrollFactor(0).setDepth(901);
+
+        // Button image
+        this.btnImage = scene.add.image(panelX + 30, panelY, 'ui_btn_blue').setScale(0.9, 0.85)
+            .setScrollFactor(0).setDepth(900).setInteractive();
+
+        // Button label
+        this.barracksLabel = scene.add.text(panelX + 30, panelY - 10, 'Barracks', style)
+            .setOrigin(0.5).setScrollFactor(0).setDepth(901);
+
+        // Cost label
+        this.barracksCost = scene.add.text(panelX + 30, panelY + 8, `${BARRACKS_COST} gold`, { ...style, color: '#ffdd44' })
+            .setOrigin(0.5).setScrollFactor(0).setDepth(901);
+
+        // Track afford state
+        this.canAfford = true;
+
+        // Button interaction
+        this.btnImage.on('pointerover', () => {
+            if (this.canAfford) this.btnImage.setTexture('ui_btn_hover');
+        });
+
+        this.btnImage.on('pointerout', () => {
+            this.btnImage.setTexture(this.canAfford ? 'ui_btn_blue' : 'ui_btn_disable');
+        });
+
+        this.btnImage.on('pointerdown', () => {
+            if (!this.canAfford) return;
             if (scene.buildSystem.active) return;
+            this.btnImage.setTexture('ui_btn_blue_pressed');
             scene.buildSystem.enterBuildMode('barracks');
         });
 
-        // Update button tint based on gold
+        this.btnImage.on('pointerup', () => {
+            this.btnImage.setTexture(this.canAfford ? 'ui_btn_blue' : 'ui_btn_disable');
+        });
+
+        // Update button state based on gold
         scene.eventBus.on('goldChanged', (gold) => {
             this.updateButtonState(gold);
         });
@@ -36,12 +62,15 @@ export default class BuildMenu {
     }
 
     updateButtonState(gold) {
-        if (gold >= BARRACKS_COST) {
-            this.barracksBtn.clearTint();
-            this.barracksBtn.setAlpha(1);
+        this.canAfford = gold >= BARRACKS_COST;
+        if (this.canAfford) {
+            this.btnImage.setTexture('ui_btn_blue');
+            this.barracksIcon.setAlpha(1);
+            this.barracksCost.setColor('#ffdd44');
         } else {
-            this.barracksBtn.setTint(0x666666);
-            this.barracksBtn.setAlpha(0.5);
+            this.btnImage.setTexture('ui_btn_disable');
+            this.barracksIcon.setAlpha(0.5);
+            this.barracksCost.setColor('#aa6666');
         }
     }
 }
