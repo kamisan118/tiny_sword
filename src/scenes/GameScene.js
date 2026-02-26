@@ -67,11 +67,9 @@ export default class GameScene extends Phaser.Scene {
         this.castle = new Castle(this, this.gridSystem, 1, 4);
         this.buildings.push(this.castle);
 
-        // 3 Gold Mines
+        // 1 Gold Mine
         this.goldMines = [
-            new GoldMine(this, this.gridSystem, 7, 2),
-            new GoldMine(this, this.gridSystem, 7, 8),
-            new GoldMine(this, this.gridSystem, 11, 5),
+            new GoldMine(this, this.gridSystem, 7, 5),
         ];
         this.buildings.push(...this.goldMines);
     }
