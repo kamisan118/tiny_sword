@@ -1,0 +1,13 @@
+{
+  "name": "tiny-swords-rts",
+  "version": "1.0.0",
+  "description": "Tiny Swords RTS - A StarCraft-like tower defense game",
+  "scripts": {
+    "dev": "live-server --port=8080 --no-browser",
+    "test": "npx playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "live-server": "^1.2.2"
+  }
+}
