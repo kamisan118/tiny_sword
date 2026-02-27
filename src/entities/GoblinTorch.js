@@ -92,9 +92,8 @@ export default class GoblinTorch extends Unit {
             if (!b.alive || b.faction === 'neutral') continue;
             const center = b.getCenter();
             const d = this.distanceToPoint(center.x, center.y);
-            const weight = b.type === 'castle' ? 0.5 : 1;
-            if (d * weight < bestDist) {
-                bestDist = d * weight;
+            if (d < bestDist) {
+                bestDist = d;
                 targetBuilding = b;
             }
         }

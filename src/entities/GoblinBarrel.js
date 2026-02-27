@@ -89,8 +89,7 @@ export default class GoblinBarrel extends Unit {
             if (!b.alive || b.faction === 'neutral') continue;
             const center = b.getCenter();
             const d = this.distanceToPoint(center.x, center.y);
-            const weight = b.type === 'castle' ? 0.5 : 1;
-            if (d * weight < bestDist) { bestDist = d * weight; targetBuilding = b; }
+            if (d < bestDist) { bestDist = d; targetBuilding = b; }
         }
         if (targetBuilding) {
             this.attackTarget = targetBuilding;
