@@ -5,14 +5,10 @@ export default class BuildMenu {
         this.scene = scene;
 
         const panelX = GAME_WIDTH / 2;
-        const panelY = GAME_HEIGHT - 55;
+        const panelY = GAME_HEIGHT - 25;
 
         const style = { fontSize: '14px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };
-
-        // Panel background (wider for two buttons)
-        this.panelBg = scene.add.image(panelX, panelY, 'ui_banner_h').setScale(3.2, 0.47)
-            .setScrollFactor(0).setDepth(899);
 
         // --- Gold Mine button (left side) ---
         const mineX = panelX - 130;
