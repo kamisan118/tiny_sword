@@ -49,7 +49,24 @@ export default class GoblinTorch extends Unit {
     }
 
     updateAI(time, delta) {
-        // If has attack target, pursue it
+        // Always scan for nearby player units (priority target)
+        let closestUnit = null;
+        let closestUnitDist = 3 * TILE_SIZE;
+        for (const unit of this.scene.playerUnits) {
+            if (!unit.alive || !unit.sprite) continue;
+            const d = this.distanceTo(unit);
+            if (d < closestUnitDist) {
+                closestUnit = unit;
+                closestUnitDist = d;
+            }
+        }
+
+        // Switch to nearby player unit if current target is a building
+        if (closestUnit && (!this.attackTarget || this.attackTarget.type !== 'warrior')) {
+            this.attackTarget = closestUnit;
+        }
+
+        // Pursue current target
         if (this.attackTarget && this.attackTarget.alive) {
             const dist = this.distanceTo(this.attackTarget);
             const range = this.attackRange * TILE_SIZE;
@@ -67,34 +84,14 @@ export default class GoblinTorch extends Unit {
             return;
         }
 
-        // No target — find one
+        // No target — find a building
         this.attackTarget = null;
-
-        // Priority: nearby player units that are blocking, then buildings (prefer castle)
-        let closestUnit = null;
-        let closestUnitDist = 3 * TILE_SIZE; // detection range
-        for (const unit of this.scene.playerUnits) {
-            if (!unit.alive || !unit.sprite) continue;
-            const d = this.distanceTo(unit);
-            if (d < closestUnitDist) {
-                closestUnit = unit;
-                closestUnitDist = d;
-            }
-        }
-
-        if (closestUnit) {
-            this.attackTarget = closestUnit;
-            return;
-        }
-
-        // Target buildings — prefer castle
         let targetBuilding = null;
         let bestDist = Infinity;
         for (const b of this.scene.buildings) {
             if (!b.alive || b.faction === 'neutral') continue;
             const center = b.getCenter();
             const d = this.distanceToPoint(center.x, center.y);
-            // Prefer castle heavily
             const weight = b.type === 'castle' ? 0.5 : 1;
             if (d * weight < bestDist) {
                 bestDist = d * weight;

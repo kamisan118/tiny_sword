@@ -49,6 +49,21 @@ export default class GoblinBarrel extends Unit {
     }
 
     updateAI(time, delta) {
+        // Always scan for nearby player units (priority target)
+        let closestUnit = null;
+        let closestUnitDist = 3 * TILE_SIZE;
+        for (const unit of this.scene.playerUnits) {
+            if (!unit.alive || !unit.sprite) continue;
+            const d = this.distanceTo(unit);
+            if (d < closestUnitDist) { closestUnit = unit; closestUnitDist = d; }
+        }
+
+        // Switch to nearby player unit if current target is a building
+        if (closestUnit && (!this.attackTarget || this.attackTarget.type !== 'warrior')) {
+            this.attackTarget = closestUnit;
+        }
+
+        // Pursue current target
         if (this.attackTarget && this.attackTarget.alive) {
             const dist = this.distanceTo(this.attackTarget);
             const range = this.attackRange * TILE_SIZE;
@@ -66,16 +81,8 @@ export default class GoblinBarrel extends Unit {
             return;
         }
 
+        // No target — find a building
         this.attackTarget = null;
-        let closestUnit = null;
-        let closestUnitDist = 3 * TILE_SIZE;
-        for (const unit of this.scene.playerUnits) {
-            if (!unit.alive || !unit.sprite) continue;
-            const d = this.distanceTo(unit);
-            if (d < closestUnitDist) { closestUnit = unit; closestUnitDist = d; }
-        }
-        if (closestUnit) { this.attackTarget = closestUnit; return; }
-
         let targetBuilding = null;
         let bestDist = Infinity;
         for (const b of this.scene.buildings) {
