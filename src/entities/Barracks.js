@@ -34,14 +34,30 @@ export default class Barracks extends Building {
             .setOrigin(0.5).setDepth(2001);
         this.uiElements.push(this.btnLabel);
 
-        // Progress bar base (BigBar 320×64)
-        this.barBase = this.scene.add.image(center.x, btnY + 22, 'ui_bigbar_base').setScale(0.4, 0.35)
-            .setDepth(2000);
-        this.uiElements.push(this.barBase);
+        // Progress bar base — 3-slice via spritesheet frames (5 frames of 64×64)
+        // Frame 0 = left cap, frame 2 = middle wood, frame 4 = right cap
+        const barY = btnY + 22;
+        const barH = 22;
+        const capW = 16;
+        const totalW = 128;
+        const midW = totalW - capW * 2;
+        const barLeft = center.x - totalW / 2;
 
-        // Progress bar fill (BigBar_Fill 64×64, uses setCrop)
-        this.progressFill = this.scene.add.image(center.x - 44, btnY + 22, 'ui_bigbar_fill')
-            .setOrigin(0, 0.5).setDisplaySize(88, 14).setDepth(2001);
+        this.barCapL = this.scene.add.image(barLeft, barY, 'ui_bigbar_base', 0)
+            .setOrigin(0, 0.5).setDisplaySize(capW, barH).setDepth(2000);
+        this.uiElements.push(this.barCapL);
+
+        this.barMid = this.scene.add.image(barLeft + capW, barY, 'ui_bigbar_base', 2)
+            .setOrigin(0, 0.5).setDisplaySize(midW, barH).setDepth(2000);
+        this.uiElements.push(this.barMid);
+
+        this.barCapR = this.scene.add.image(barLeft + capW + midW, barY, 'ui_bigbar_base', 4)
+            .setOrigin(0, 0.5).setDisplaySize(capW, barH).setDepth(2000);
+        this.uiElements.push(this.barCapR);
+
+        // Progress bar fill (aligned inside the middle section)
+        this.progressFill = this.scene.add.image(barLeft + capW, barY, 'ui_bigbar_fill')
+            .setOrigin(0, 0.5).setDisplaySize(midW, 14).setDepth(2001);
         this.progressFill.setCrop(0, 0, 0, 64);
         this.uiElements.push(this.progressFill);
 
@@ -138,7 +154,9 @@ export default class Barracks extends Building {
         this.uiElements = [];
         this.btnImage = null;
         this.progressFill = null;
-        this.barBase = null;
+        this.barCapL = null;
+        this.barMid = null;
+        this.barCapR = null;
         super.onDestroyed();
     }
 }

@@ -30,6 +30,9 @@ export const spritesheets = [
 
     // --- Terrain ---
     { key: 'tilemap_flat',     path: `${TERRAIN}/Ground/Tilemap_Flat.png`,    frameWidth: 64, frameHeight: 64 },
+
+    // --- UI Bars (spritesheet for 3-slice) ---
+    { key: 'ui_bigbar_base',   path: `${UI}/UI Elements/Bars/BigBar_Base.png`, frameWidth: 64, frameHeight: 64 },
 ];
 
 // Static image definitions: { key, path }
@@ -60,7 +63,6 @@ export const images = [
     { key: 'ui_btn_hover',        path: `${UI}/Buttons/Button_Hover_3Slides.png` },
     { key: 'ui_bar_base',         path: `${UI}/UI Elements/Bars/SmallBar_Base.png` },
     { key: 'ui_bar_fill',         path: `${UI}/UI Elements/Bars/SmallBar_Fill.png` },
-    { key: 'ui_bigbar_base',     path: `${UI}/UI Elements/Bars/BigBar_Base.png` },
     { key: 'ui_bigbar_fill',     path: `${UI}/UI Elements/Bars/BigBar_Fill.png` },
     { key: 'ui_icon_coin',        path: `${UI}/UI Elements/Icons/Icon_03.png` },
     { key: 'ui_icon_sword',       path: `${UI}/UI Elements/Icons/Icon_05.png` },
