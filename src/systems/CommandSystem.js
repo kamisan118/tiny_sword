@@ -6,7 +6,7 @@ export default class CommandSystem {
     issueMove(units, px, py) {
         for (const unit of units) {
             if (!unit.alive) continue;
-            unit.moveToWithPathfinding(px, py);
+            unit.moveTo(px, py);
         }
         this.showMoveMarker(px, py);
     }

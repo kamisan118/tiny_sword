@@ -74,7 +74,7 @@ export default class GameAPI {
         const unit = this._findUnit(unitId);
         if (!unit || !unit.alive) return false;
         const pos = this.scene.gridSystem.gridToPixel(gx, gy);
-        unit.moveToWithPathfinding(pos.x, pos.y);
+        unit.moveTo(pos.x, pos.y);
         return true;
     }
 
