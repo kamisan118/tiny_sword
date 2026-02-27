@@ -1,4 +1,4 @@
-import { TILE_SIZE, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
+import { TILE_SIZE, GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from '../config/gameConfig.js';
 import GridSystem from '../systems/GridSystem.js';
 import Castle from '../entities/Castle.js';
 import SelectionSystem from '../systems/SelectionSystem.js';
@@ -33,6 +33,11 @@ export default class GameScene extends Phaser.Scene {
         this.enemyUnits = [];
 
         this.renderTerrain();
+
+        // Camera and physics world bounds for scrollable map
+        this.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
         this.placeStartingBuildings();
 
         // Systems
