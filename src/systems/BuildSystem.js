@@ -8,9 +8,9 @@ export default class BuildSystem {
         this.active = false;
         this.buildingType = null;
         this.ghostSprite = null;
-        this.ghostTint = null; // green/red overlay
         this.gridW = 0;
         this.gridH = 0;
+        this.gridOverlay = null;
 
         this.setupInput();
     }
@@ -44,6 +44,60 @@ export default class BuildSystem {
             this.ghostSprite = this.scene.add.image(0, 0, c.tex);
             this.ghostSprite.setAlpha(0.6);
             this.ghostSprite.setDepth(2000);
+        }
+
+        this.showGridOverlay();
+    }
+
+    showGridOverlay() {
+        this.gridOverlay = this.scene.add.graphics().setDepth(1999);
+
+        const gs = this.scene.gridSystem;
+        // Grass area: 1 tile border
+        const gLeft = 1, gRight = GRID_COLS - 2;
+        const gTop = 1, gBottom = GRID_ROWS - 2;
+
+        // Draw cell tints
+        for (let gy = gTop; gy <= gBottom; gy++) {
+            for (let gx = gLeft; gx <= gRight; gx++) {
+                const px = gx * TILE_SIZE;
+                const py = gy * TILE_SIZE;
+                const free = gs.grid[gy][gx] === 0;
+                const inZone = gx <= PLAYER_ZONE_MAX_X;
+
+                if (free && inZone) {
+                    this.gridOverlay.fillStyle(0x00ff00, 0.1);
+                } else {
+                    this.gridOverlay.fillStyle(0xff0000, 0.15);
+                }
+                this.gridOverlay.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+            }
+        }
+
+        // Draw grid lines
+        this.gridOverlay.lineStyle(1, 0xffffff, 0.2);
+        const x1 = gLeft * TILE_SIZE, x2 = (gRight + 1) * TILE_SIZE;
+        const y1 = gTop * TILE_SIZE, y2 = (gBottom + 1) * TILE_SIZE;
+
+        for (let gx = gLeft; gx <= gRight + 1; gx++) {
+            const px = gx * TILE_SIZE;
+            this.gridOverlay.lineBetween(px, y1, px, y2);
+        }
+        for (let gy = gTop; gy <= gBottom + 1; gy++) {
+            const py = gy * TILE_SIZE;
+            this.gridOverlay.lineBetween(x1, py, x2, py);
+        }
+
+        // Draw player zone boundary (thicker line)
+        const zoneX = (PLAYER_ZONE_MAX_X + 1) * TILE_SIZE;
+        this.gridOverlay.lineStyle(2, 0xffaa00, 0.5);
+        this.gridOverlay.lineBetween(zoneX, y1, zoneX, y2);
+    }
+
+    hideGridOverlay() {
+        if (this.gridOverlay) {
+            this.gridOverlay.destroy();
+            this.gridOverlay = null;
         }
     }
 
@@ -110,6 +164,7 @@ export default class BuildSystem {
     cancelBuild() {
         this.active = false;
         this.buildingType = null;
+        this.hideGridOverlay();
         if (this.ghostSprite) {
             this.ghostSprite.destroy();
             this.ghostSprite = null;
