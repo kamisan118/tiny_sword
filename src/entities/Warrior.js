@@ -96,7 +96,7 @@ export default class Warrior extends Unit {
     }
 
     scanForEnemies() {
-        const detectRange = 3 * TILE_SIZE;
+        const detectRange = 5 * TILE_SIZE;
         let closest = null;
         let closestDist = Infinity;
 
