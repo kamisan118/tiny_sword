@@ -59,6 +59,23 @@ export default class GameAPI {
         };
     }
 
+    getCameraState() {
+        const cam = this.scene.cameras.main;
+        return {
+            scrollX: cam.scrollX,
+            scrollY: cam.scrollY,
+            viewportWidth: cam.width,
+            viewportHeight: cam.height
+        };
+    }
+
+    scrollCamera(dx, dy) {
+        const cam = this.scene.cameras.main;
+        cam.scrollX += dx;
+        cam.scrollY += dy;
+        return this.getCameraState();
+    }
+
     // --- Unit Commands ---
 
     selectUnit(unitId) {
