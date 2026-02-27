@@ -1,4 +1,3 @@
 {
-  "port": 8080,
-  "ignore": ".git,node_modules"
+  "port": 8080
 }
