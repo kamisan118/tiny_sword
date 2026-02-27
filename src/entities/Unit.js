@@ -54,7 +54,8 @@ export default class Unit {
         this.sprite.unitRef = this;
 
         // Selection indicator (hidden by default)
-        this.selectionCircle = scene.add.circle(pos.x, pos.y + 10, 20, 0x00ff00, 0.3);
+        this.selectionCircle = scene.add.image(pos.x, pos.y, 'ui_cursor_select');
+        this.selectionCircle.setScale(0.7);
         this.selectionCircle.setVisible(false);
         this.selectionCircle.setDepth(pos.y - 1);
 
@@ -74,8 +75,8 @@ export default class Unit {
         // Update depth for y-sorting
         this.sprite.setDepth(this.sprite.y);
 
-        // Update selection circle position
-        this.selectionCircle.setPosition(this.sprite.x, this.sprite.y + 10);
+        // Update selection indicator position
+        this.selectionCircle.setPosition(this.sprite.x, this.sprite.y);
         this.selectionCircle.setDepth(this.sprite.y - 1);
 
         // Update health bar
@@ -209,11 +210,13 @@ export default class Unit {
         // Pulse animation on select
         if (selected && this.scene && this.scene.tweens) {
             if (this._selectTween) this._selectTween.destroy();
+            this.selectionCircle.setScale(0.7);
+            this.selectionCircle.setAlpha(1);
             this._selectTween = this.scene.tweens.add({
                 targets: this.selectionCircle,
-                scaleX: 1.3,
-                scaleY: 1.3,
-                alpha: 0.15,
+                scaleX: 0.85,
+                scaleY: 0.85,
+                alpha: 0.6,
                 duration: 600,
                 yoyo: true,
                 repeat: -1,
@@ -223,8 +226,8 @@ export default class Unit {
             this._selectTween.destroy();
             this._selectTween = null;
             if (this.selectionCircle) {
-                this.selectionCircle.setScale(1);
-                this.selectionCircle.setAlpha(0.3);
+                this.selectionCircle.setScale(0.7);
+                this.selectionCircle.setAlpha(1);
             }
         }
     }
