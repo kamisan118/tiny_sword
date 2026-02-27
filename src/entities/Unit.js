@@ -85,6 +85,8 @@ export default class Unit {
 
     // Direct move to pixel position (no pathfinding)
     moveTo(px, py) {
+        this.finalTargetX = px;
+        this.finalTargetY = py;
         this.targetX = px;
         this.targetY = py;
         this.state = UnitState.MOVING;
@@ -128,7 +130,18 @@ export default class Unit {
 
     _advanceToNextPathPoint() {
         if (this.pathIndex >= this.path.length) {
-            this.stopMoving();
+            // Path complete — resume direct move to final target if set
+            if (this.finalTargetX !== undefined) {
+                const fx = this.finalTargetX;
+                const fy = this.finalTargetY;
+                this.path = [];
+                this.pathIndex = 0;
+                this.targetX = fx;
+                this.targetY = fy;
+                // Don't call moveTo to avoid resetting finalTarget
+            } else {
+                this.stopMoving();
+            }
             return;
         }
         const point = this.path[this.pathIndex];
@@ -164,8 +177,28 @@ export default class Unit {
         const step = (this.speed * delta) / 1000;
         const nx = dx / dist;
         const ny = dy / dist;
-        this.sprite.x += nx * step;
-        this.sprite.y += ny * step;
+        const newX = this.sprite.x + nx * step;
+        const newY = this.sprite.y + ny * step;
+
+        // Check if new position enters an occupied grid cell
+        const newGrid = this.gridSystem.pixelToGrid(newX, newY);
+        if (!this.gridSystem.isWalkable(newGrid.gx, newGrid.gy)) {
+            // Allow movement if the occupied cell belongs to the attack target
+            const cellId = this.gridSystem.grid[newGrid.gy]?.[newGrid.gx];
+            if (this.attackTarget && cellId === this.attackTarget.id) {
+                // OK — approaching attack target building
+            } else if (this.path.length === 0) {
+                // Hit a building during direct move — pathfind around it
+                this._detourAroundObstacle();
+                return;
+            } else {
+                this.stopMoving();
+                return;
+            }
+        }
+
+        this.sprite.x = newX;
+        this.sprite.y = newY;
 
         // Flip sprite based on movement direction
         if (dx < -1) this.sprite.setFlipX(true);
@@ -196,10 +229,34 @@ export default class Unit {
         });
     }
 
+    _detourAroundObstacle() {
+        const start = this.getGridPos();
+        const end = this.gridSystem.pixelToGrid(this.finalTargetX, this.finalTargetY);
+        const fullPath = findPath(this.gridSystem, start.gx, start.gy, end.gx, end.gy);
+
+        if (!fullPath || fullPath.length === 0) {
+            this.stopMoving();
+            return;
+        }
+
+        // Truncate: keep path only until the first point with clear line of sight to final target
+        let truncated = fullPath;
+        for (let i = 0; i < fullPath.length; i++) {
+            if (this.gridSystem.hasLineOfSight(fullPath[i].gx, fullPath[i].gy, end.gx, end.gy)) {
+                truncated = fullPath.slice(0, i + 1);
+                break;
+            }
+        }
+
+        this.moveAlongPath(truncated);
+    }
+
     stopMoving() {
         this.state = UnitState.IDLE;
         this.path = [];
         this.pathIndex = 0;
+        this.finalTargetX = undefined;
+        this.finalTargetY = undefined;
         this.playAnim('idle');
     }
 

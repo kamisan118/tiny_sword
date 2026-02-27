@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Tiny Swords RTS - A StarCraft-like tower defense game",
   "scripts": {
-    "dev": "live-server --port=8080 --no-browser --ignore='**/.git/**'",
+    "dev": "live-server --port=8081 --no-browser --ignore='**/.git/**'",
     "test": "npx playwright test"
   },
   "devDependencies": {

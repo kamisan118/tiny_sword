@@ -61,6 +61,24 @@ export default class GridSystem {
         return this.inBounds(gx, gy) && this.grid[gy][gx] === 0;
     }
 
+    // Check if a straight line between two grid cells crosses only walkable cells
+    hasLineOfSight(gx1, gy1, gx2, gy2) {
+        const dx = Math.abs(gx2 - gx1);
+        const dy = Math.abs(gy2 - gy1);
+        const sx = gx1 < gx2 ? 1 : -1;
+        const sy = gy1 < gy2 ? 1 : -1;
+        let err = dx - dy;
+        let x = gx1, y = gy1;
+
+        while (x !== gx2 || y !== gy2) {
+            const e2 = 2 * err;
+            if (e2 > -dy) { err -= dy; x += sx; }
+            if (e2 < dx) { err += dx; y += sy; }
+            if ((x !== gx2 || y !== gy2) && !this.isWalkable(x, y)) return false;
+        }
+        return true;
+    }
+
     inBounds(gx, gy) {
         return gx >= 0 && gx < GRID_COLS && gy >= 0 && gy < GRID_ROWS;
     }
