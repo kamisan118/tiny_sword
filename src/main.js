@@ -1,11 +1,11 @@
-import { GAME_WIDTH, GAME_HEIGHT } from './config/gameConfig.js';
+import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from './config/gameConfig.js';
 import BootScene from './scenes/BootScene.js';
 import GameScene from './scenes/GameScene.js';
 
 const config = {
     type: Phaser.AUTO,
-    width: GAME_WIDTH,
-    height: GAME_HEIGHT,
+    width: VIEWPORT_WIDTH,
+    height: VIEWPORT_HEIGHT,
     parent: 'game-container',
     backgroundColor: '#525B66',
     scene: [BootScene, GameScene],
