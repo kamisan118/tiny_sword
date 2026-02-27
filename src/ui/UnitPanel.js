@@ -1,4 +1,4 @@
-import { GAME_WIDTH, GAME_HEIGHT, WARRIOR_COST } from '../config/gameConfig.js';
+import { WARRIOR_COST, TILE_SIZE } from '../config/gameConfig.js';
 
 export default class UnitPanel {
     constructor(scene) {
@@ -30,30 +30,21 @@ export default class UnitPanel {
         this.visible = true;
         this.clear();
 
-        const panelX = GAME_WIDTH / 2 + 200;
-        const panelY = GAME_HEIGHT - 55;
+        const center = barracks.getCenter();
+        const panelX = center.x;
+        const panelY = center.y - (barracks.gridH * TILE_SIZE) / 2 - 40;
 
-        const style = { fontSize: '14px', color: '#fef3c0', fontFamily: 'Arial',
+        const style = { fontSize: '12px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };
 
-        // Panel background
-        const bg = this.scene.add.image(panelX, panelY, 'ui_banner_h').setScale(1.56, 0.52)
-            .setScrollFactor(0).setDepth(899);
-        this.elements.push(bg);
-
-        // Sword icon
-        const icon = this.scene.add.image(panelX - 85, panelY - 12, 'ui_icon_sword').setScale(0.5)
-            .setScrollFactor(0).setDepth(901);
-        this.elements.push(icon);
-
         // Button image
-        this.btnImage = this.scene.add.image(panelX + 15, panelY - 12, 'ui_btn_blue').setScale(0.75)
-            .setScrollFactor(0).setDepth(900).setInteractive();
+        this.btnImage = this.scene.add.image(panelX, panelY, 'ui_btn_blue').setScale(0.8, 0.7)
+            .setDepth(2000).setInteractive();
         this.elements.push(this.btnImage);
 
         // Button label
-        const label = this.scene.add.text(panelX + 15, panelY - 12, `Train Warrior (${WARRIOR_COST}g)`, style)
-            .setOrigin(0.5).setScrollFactor(0).setDepth(901);
+        const label = this.scene.add.text(panelX, panelY, `Train (${WARRIOR_COST}g)`, style)
+            .setOrigin(0.5).setDepth(2001);
         this.elements.push(label);
 
         // Button interaction
@@ -88,14 +79,14 @@ export default class UnitPanel {
         });
 
         // Progress bar base
-        this.barBase = this.scene.add.image(panelX, panelY + 25, 'ui_bar_base').setScale(0.55, 0.45)
-            .setScrollFactor(0).setDepth(900);
+        this.barBase = this.scene.add.image(panelX, panelY + 28, 'ui_bar_base').setScale(0.45, 0.35)
+            .setDepth(2000);
         this.elements.push(this.barBase);
 
         // Progress bar fill
-        this.progressFill = this.scene.add.image(panelX - 80, panelY + 25, 'ui_bar_fill')
-            .setOrigin(0, 0.5).setDisplaySize(160, 22)
-            .setScrollFactor(0).setDepth(901);
+        this.progressFill = this.scene.add.image(panelX - 65, panelY + 28, 'ui_bar_fill')
+            .setOrigin(0, 0.5).setDisplaySize(130, 18)
+            .setDepth(2001);
         this.progressFill.setCrop(0, 0, 0, 64);
         this.elements.push(this.progressFill);
 
