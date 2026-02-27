@@ -69,4 +69,5 @@ export const images = [
     { key: 'ui_icon_sword',       path: `${UI}/UI Elements/Icons/Icon_05.png` },
     { key: 'ui_cursor_select',    path: `${UI}/UI Elements/Cursors/Cursor_04.png` },
     { key: 'ui_special_paper',  path: `${UI}/UI Elements/Papers/SpecialPaper.png` },
+    { key: 'ui_regular_paper', path: `${UI}/UI Elements/Papers/RegularPaper.png` },
 ];

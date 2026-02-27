@@ -178,24 +178,68 @@ export default class GameScene extends Phaser.Scene {
         const overlay = this.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6);
         overlay.setScrollFactor(0).setDepth(5000);
 
+        // 9-slice RegularPaper panel
+        this._createRegularPaperPanel(cx, cy, 400, 250);
+
         // Result text
-        const titleStyle = { fontSize: '64px', color: result === 'victory' ? '#ffdd44' : '#ff4444',
+        const titleStyle = { fontSize: '52px', color: result === 'victory' ? '#ffdd44' : '#ff4444',
                              fontFamily: 'Arial', stroke: '#000000', strokeThickness: 6 };
         const title = result === 'victory' ? 'VICTORY' : 'DEFEAT';
-        this.add.text(cx, cy - 60, title, titleStyle)
-            .setOrigin(0.5).setScrollFactor(0).setDepth(5001);
+        this.add.text(cx, cy - 50, title, titleStyle)
+            .setOrigin(0.5).setScrollFactor(0).setDepth(5002);
 
-        // Play again button
-        const btnStyle = { fontSize: '28px', color: '#ffffff', fontFamily: 'Arial',
-                           stroke: '#000000', strokeThickness: 3, backgroundColor: '#336633',
-                           padding: { x: 20, y: 10 } };
-        const btn = this.add.text(cx, cy + 40, 'Play Again', btnStyle)
-            .setOrigin(0.5).setScrollFactor(0).setDepth(5001).setInteractive();
+        // Play Again button using game UI assets
+        const btnImg = this.add.image(cx, cy + 40, 'ui_btn_blue')
+            .setScale(1.2, 0.9).setScrollFactor(0).setDepth(5002).setInteractive();
+        const btnLabel = this.add.text(cx, cy + 38, 'Play Again', {
+            fontSize: '22px', color: '#fef3c0', fontFamily: 'Arial',
+            stroke: '#3a2a14', strokeThickness: 3
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(5003);
 
-        btn.on('pointerover', () => btn.setStyle({ backgroundColor: '#44aa44' }));
-        btn.on('pointerout', () => btn.setStyle({ backgroundColor: '#336633' }));
-        btn.on('pointerdown', () => {
+        btnImg.on('pointerover', () => btnImg.setTexture('ui_btn_hover'));
+        btnImg.on('pointerout', () => btnImg.setTexture('ui_btn_blue'));
+        btnImg.on('pointerdown', () => {
+            btnImg.setTexture('ui_btn_blue_pressed');
             this.scene.restart();
         });
+    }
+
+    _createRegularPaperPanel(cx, cy, w, h) {
+        // Define custom frames (exact pixel positions from RegularPaper.png)
+        const tex = this.textures.get('ui_regular_paper');
+        if (!tex.has('rp_tl')) {
+            tex.add('rp_tl', 0, 12, 20, 52, 44);
+            tex.add('rp_t',  0, 128, 20, 64, 44);
+            tex.add('rp_tr', 0, 256, 20, 52, 44);
+            tex.add('rp_l',  0, 12, 128, 52, 64);
+            tex.add('rp_c',  0, 128, 128, 64, 64);
+            tex.add('rp_r',  0, 256, 128, 52, 64);
+            tex.add('rp_bl', 0, 12, 256, 52, 45);
+            tex.add('rp_b',  0, 128, 256, 64, 43);
+            tex.add('rp_br', 0, 256, 256, 52, 45);
+        }
+
+        const cs = 52;
+        const dep = 5001;
+        const x1 = cx - w / 2, x2 = cx + w / 2;
+        const y1 = cy - h / 2, y2 = cy + h / 2;
+
+        // Solid fill behind 9-slice to prevent dark overlay bleeding through
+        this.add.rectangle(cx, cy, w - 20, h - 20, 0xeee1c6)
+            .setScrollFactor(0).setDepth(dep);
+
+        const add9 = (x, y, frame, dw, dh) =>
+            this.add.image(x, y, 'ui_regular_paper', frame)
+                .setDisplaySize(dw, dh).setScrollFactor(0).setDepth(dep + 0.1);
+
+        add9(cx, cy, 'rp_c', w - 2 * cs, h - 2 * cs);
+        add9(cx, y1 + cs / 2, 'rp_t', w - 2 * cs, cs);
+        add9(cx, y2 - cs / 2, 'rp_b', w - 2 * cs, cs);
+        add9(x1 + cs / 2, cy, 'rp_l', cs, h - 2 * cs);
+        add9(x2 - cs / 2, cy, 'rp_r', cs, h - 2 * cs);
+        add9(x1 + cs / 2, y1 + cs / 2, 'rp_tl', cs, cs);
+        add9(x2 - cs / 2, y1 + cs / 2, 'rp_tr', cs, cs);
+        add9(x1 + cs / 2, y2 - cs / 2, 'rp_bl', cs, cs);
+        add9(x2 - cs / 2, y2 - cs / 2, 'rp_br', cs, cs);
     }
 }
