@@ -19,9 +19,10 @@ test.describe('Combat System', () => {
         const errors = collectPageErrors(page);
         await waitForGameReady(page);
 
-        // Build barracks and force warrior spawn
+        // Build barracks and produce warrior
         await page.evaluate(() => window.gameAPI.setGold(1000));
-        await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
+        const buildResult = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
+        await page.evaluate((bid) => window.gameAPI.produceUnit(bid, 'warrior'), buildResult.buildingId);
 
         // Spawn an enemy nearby
         const enemyResult = await page.evaluate(() => window.gameAPI.spawnTestEnemy('barrel', 10, 6));
@@ -31,12 +32,11 @@ test.describe('Combat System', () => {
         const initialHp = state.enemyUnits.find(u => u.id === enemyId).hp;
 
         // Force warrior spawn by advancing produce timer
-        await page.evaluate(([bid]) => {
+        await page.evaluate((bid) => {
             const scene = window.game.scene.getScene('GameScene');
             const barracks = scene.buildings.find(b => b.id === bid);
             if (barracks) barracks.produceTimer = 999999;
-        }, [state.buildings.find(b => b.type === 'barracks').id]);
-
+        }, buildResult.buildingId);
         await page.waitForTimeout(500);
 
         // Check if warrior appeared, if so command attack
@@ -56,7 +56,6 @@ test.describe('Combat System', () => {
             if (enemy) {
                 expect(enemy.hp).toBeLessThan(initialHp);
             }
-            // If enemy died, that's also valid
         }
 
         expect(errors).toHaveLength(0);

@@ -4,6 +4,7 @@ import GoblinBarrel from '../entities/GoblinBarrel.js';
 import GoblinTNT from '../entities/GoblinTNT.js';
 import Barracks from '../entities/Barracks.js';
 import GoldMine from '../entities/GoldMine.js';
+import { WARRIOR_COST } from '../config/gameConfig.js';
 
 export default class GameAPI {
     constructor(scene) {
@@ -105,6 +106,29 @@ export default class GameAPI {
         const building = new cfg.cls(this.scene, this.scene.gridSystem, gx, gy);
         this.scene.buildings.push(building);
         return { success: true, buildingId: building.id };
+    }
+
+    produceUnit(buildingId, unitType) {
+        const building = this.scene.buildings.find(b => b.id === buildingId && b.alive);
+        if (!building) return { success: false, reason: 'building_not_found' };
+
+        if (building.type === 'barracks' && unitType === 'warrior') {
+            if (!this.scene.resourceSystem.spendGold(WARRIOR_COST)) {
+                return { success: false, reason: 'insufficient_gold' };
+            }
+            const started = building.produceUnit(() => {
+                const cell = this.scene.gridSystem.findAdjacentFreeCell(
+                    building.gx, building.gy, building.gridW, building.gridH
+                );
+                if (cell) {
+                    const warrior = new Warrior(this.scene, this.scene.gridSystem, cell.gx, cell.gy);
+                    this.scene.playerUnits.push(warrior);
+                }
+            });
+            if (!started) return { success: false, reason: 'already_producing' };
+            return { success: true };
+        }
+        return { success: false, reason: 'unsupported' };
     }
 
     // --- Test Helpers ---

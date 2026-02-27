@@ -13,6 +13,7 @@ export const ENEMY_SPAWN_MIN_X = 18;   // columns 18-19 for enemy spawn
 export const STARTING_GOLD = 100;
 
 // Unit costs
+export const WARRIOR_COST = 75;
 export const BARRACKS_COST = 150;
 export const GOLDMINE_COST = 100;
 

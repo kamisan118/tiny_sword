@@ -1,22 +1,26 @@
 import { test, expect } from '@playwright/test';
 import { waitForGameReady, getGameState, collectPageErrors } from '../helpers/gameHelper.js';
 
+async function buildBarracksAndProduceWarrior(page) {
+    await page.evaluate(() => window.gameAPI.setGold(500));
+    const result = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
+    await page.evaluate((bid) => window.gameAPI.produceUnit(bid, 'warrior'), result.buildingId);
+
+    // Force complete production
+    await page.evaluate((bid) => {
+        const scene = window.game.scene.getScene('GameScene');
+        const barracks = scene.buildings.find(b => b.id === bid);
+        if (barracks) barracks.produceTimer = 999999;
+    }, result.buildingId);
+    await page.waitForTimeout(500);
+}
+
 test.describe('Unit Selection & Movement', () => {
     test('select a warrior via API', async ({ page }) => {
         const errors = collectPageErrors(page);
         await waitForGameReady(page);
 
-        // Build barracks and wait for auto-produced warrior
-        await page.evaluate(() => window.gameAPI.setGold(500));
-        await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
-
-        // Force warrior spawn by advancing produce timer
-        await page.evaluate(() => {
-            const scene = window.game.scene.getScene('GameScene');
-            const barracks = scene.buildings.find(b => b.type === 'barracks');
-            if (barracks) barracks.produceTimer = 999999;
-        });
-        await page.waitForTimeout(500);
+        await buildBarracksAndProduceWarrior(page);
 
         const state = await getGameState(page);
         const warrior = state.playerUnits.find(u => u.type === 'warrior');
@@ -31,15 +35,7 @@ test.describe('Unit Selection & Movement', () => {
         const errors = collectPageErrors(page);
         await waitForGameReady(page);
 
-        // Build barracks and force warrior spawn
-        await page.evaluate(() => window.gameAPI.setGold(500));
-        await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
-        await page.evaluate(() => {
-            const scene = window.game.scene.getScene('GameScene');
-            const barracks = scene.buildings.find(b => b.type === 'barracks');
-            if (barracks) barracks.produceTimer = 999999;
-        });
-        await page.waitForTimeout(500);
+        await buildBarracksAndProduceWarrior(page);
 
         const state = await getGameState(page);
         const warrior = state.playerUnits.find(u => u.type === 'warrior');

@@ -8,6 +8,8 @@ import EventBus from '../utils/EventBus.js';
 import HUD from '../ui/HUD.js';
 import BuildSystem from '../systems/BuildSystem.js';
 import BuildMenu from '../ui/BuildMenu.js';
+import Warrior from '../entities/Warrior.js';
+import UnitPanel from '../ui/UnitPanel.js';
 import CombatSystem from '../systems/CombatSystem.js';
 import WaveSystem from '../systems/WaveSystem.js';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
@@ -45,6 +47,8 @@ export default class GameScene extends Phaser.Scene {
         this.buildMenu = new BuildMenu(this);
         this.combatSystem = new CombatSystem(this);
         this.waveSystem = new WaveSystem(this);
+        this._WarriorClass = Warrior;
+        this.unitPanel = new UnitPanel(this);
 
         this.gameOver = false;
         this.gameResult = null; // 'victory' or 'defeat'
