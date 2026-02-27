@@ -92,7 +92,7 @@ export default class GameAPI {
     buildStructure(type, gx, gy) {
         const bs = this.scene.buildSystem;
         const configs = {
-            barracks: { w: 3, h: 4, cls: Barracks },
+            barracks: { w: 3, h: 3, cls: Barracks },
             goldmine: { w: 3, h: 2, cls: GoldMine },
         };
         const cfg = configs[type];
