@@ -3,7 +3,7 @@ import { CASTLE_HP } from '../config/gameConfig.js';
 
 export default class Castle extends Building {
     constructor(scene, gridSystem, gx, gy) {
-        super(scene, gridSystem, gx, gy, 5, 4, 'castle_blue', CASTLE_HP);
+        super(scene, gridSystem, gx, gy, 5, 3, 'castle_blue', CASTLE_HP);
         this.type = 'castle';
         this.faction = 'player';
     }

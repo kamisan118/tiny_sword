@@ -4,7 +4,7 @@ import { BARRACKS_HP, BARRACKS_COST, WARRIOR_COST, WARRIOR_PRODUCE_TIME, TILE_SI
 
 export default class Barracks extends Building {
     constructor(scene, gridSystem, gx, gy) {
-        super(scene, gridSystem, gx, gy, 3, 4, 'barracks', BARRACKS_HP);
+        super(scene, gridSystem, gx, gy, 3, 3, 'barracks', BARRACKS_HP);
         this.type = 'barracks';
         this.faction = 'player';
         this.producing = false;

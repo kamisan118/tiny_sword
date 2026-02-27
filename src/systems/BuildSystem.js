@@ -35,7 +35,7 @@ export default class BuildSystem {
         this.active = true;
         this.buildingType = type;
 
-        const config = { barracks: { w: 3, h: 4, tex: 'barracks' },
+        const config = { barracks: { w: 3, h: 3, tex: 'barracks' },
                          goldmine: { w: 3, h: 2, tex: 'goldmine_active' } };
         const c = config[type];
         if (c) {
