@@ -33,6 +33,7 @@ export const spritesheets = [
 
     // --- UI Bars (spritesheet for 3-slice) ---
     { key: 'ui_bigbar_base',   path: `${UI}/UI Elements/Bars/BigBar_Base.png`, frameWidth: 64, frameHeight: 64 },
+
 ];
 
 // Static image definitions: { key, path }
@@ -67,4 +68,5 @@ export const images = [
     { key: 'ui_icon_coin',        path: `${UI}/UI Elements/Icons/Icon_03.png` },
     { key: 'ui_icon_sword',       path: `${UI}/UI Elements/Icons/Icon_05.png` },
     { key: 'ui_cursor_select',    path: `${UI}/UI Elements/Cursors/Cursor_04.png` },
+    { key: 'ui_special_paper',  path: `${UI}/UI Elements/Papers/SpecialPaper.png` },
 ];

@@ -62,13 +62,34 @@ export default class GameScene extends Phaser.Scene {
     }
 
     renderTerrain() {
-        // Water background fill
-        for (let gy = 0; gy < GRID_ROWS; gy++) {
-            for (let gx = 0; gx < GRID_COLS; gx++) {
-                const { x, y } = this.gridSystem.gridToPixel(gx, gy);
-                this.add.image(x, y, 'water');
-            }
-        }
+        // Full-screen 9-slice SpecialPaper background (replaces water)
+        // Define custom frames from exact pixel positions in the spritesheet
+        const tex = this.textures.get('ui_special_paper');
+        tex.add('sp_tl', 0, 10, 21, 54, 43);
+        tex.add('sp_t',  0, 128, 21, 64, 43);
+        tex.add('sp_tr', 0, 256, 21, 54, 43);
+        tex.add('sp_l',  0, 10, 128, 54, 64);
+        tex.add('sp_c',  0, 128, 128, 64, 64);
+        tex.add('sp_r',  0, 256, 128, 54, 64);
+        tex.add('sp_bl', 0, 10, 256, 54, 43);
+        tex.add('sp_b',  0, 128, 256, 64, 43);
+        tex.add('sp_br', 0, 256, 256, 55, 43);
+
+        const cs = 64; // corner display size
+        const w = GAME_WIDTH, h = GAME_HEIGHT;
+        const add9 = (x, y, frame, dw, dh) =>
+            this.add.image(x, y, 'ui_special_paper', frame)
+                .setDisplaySize(dw, dh).setDepth(-1);
+
+        add9(w / 2, h / 2, 'sp_c', w - 2 * cs, h - 2 * cs);       // center
+        add9(w / 2, cs / 2, 'sp_t', w - 2 * cs, cs);               // top
+        add9(w / 2, h - cs / 2, 'sp_b', w - 2 * cs, cs);           // bottom
+        add9(cs / 2, h / 2, 'sp_l', cs, h - 2 * cs);               // left
+        add9(w - cs / 2, h / 2, 'sp_r', cs, h - 2 * cs);           // right
+        add9(cs / 2, cs / 2, 'sp_tl', cs, cs);                      // TL
+        add9(w - cs / 2, cs / 2, 'sp_tr', cs, cs);                  // TR
+        add9(cs / 2, h - cs / 2, 'sp_bl', cs, cs);                  // BL
+        add9(w - cs / 2, h - cs / 2, 'sp_br', cs, cs);              // BR
 
         // Grass island — leave 1 tile water border on edges
         const grassLeft = 1;
