@@ -71,8 +71,8 @@ export default class GameAPI {
 
     scrollCamera(dx, dy) {
         const cam = this.scene.cameras.main;
-        cam.scrollX += dx;
-        cam.scrollY += dy;
+        cam.scrollX = Math.max(cam._bounds.x, Math.min(cam._bounds.right - cam.width, cam.scrollX + dx));
+        cam.scrollY = Math.max(cam._bounds.y, Math.min(cam._bounds.bottom - cam.height, cam.scrollY + dy));
         return this.getCameraState();
     }
 
