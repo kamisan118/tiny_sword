@@ -1,5 +1,5 @@
 import { spritesheets, images } from '../config/assetManifest.js';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
+import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from '../config/gameConfig.js';
 
 export default class BootScene extends Phaser.Scene {
     constructor() {
@@ -8,8 +8,8 @@ export default class BootScene extends Phaser.Scene {
 
     preload() {
         // Progress bar
-        const cx = GAME_WIDTH / 2;
-        const cy = GAME_HEIGHT / 2;
+        const cx = VIEWPORT_WIDTH / 2;
+        const cy = VIEWPORT_HEIGHT / 2;
         const barW = 400;
         const barH = 30;
 
