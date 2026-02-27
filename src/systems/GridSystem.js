@@ -73,12 +73,20 @@ export default class GridSystem {
         return gx >= ENEMY_SPAWN_MIN_X;
     }
 
-    // Find the nearest free cell adjacent to a building
+    // Find the nearest free cell adjacent to a building, preferring the bottom-center (doorway)
     findAdjacentFreeCell(gx, gy, width, height) {
+        // Try bottom-center first (doorway)
+        const midX = gx + Math.floor(width / 2);
+        const bottomY = gy + height;
+        if (this.isWalkable(midX, bottomY)) {
+            return { gx: midX, gy: bottomY };
+        }
+
+        // Fallback: scan all adjacent cells, bottom row first
         const candidates = [];
-        for (let dy = -1; dy <= height; dy++) {
+        for (let dy = height; dy >= -1; dy--) {
             for (let dx = -1; dx <= width; dx++) {
-                if (dy >= 0 && dy < height && dx >= 0 && dx < width) continue; // skip inside
+                if (dy >= 0 && dy < height && dx >= 0 && dx < width) continue;
                 const cx = gx + dx;
                 const cy = gy + dy;
                 if (this.isWalkable(cx, cy)) {
