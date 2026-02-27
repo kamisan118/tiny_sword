@@ -1,13 +1,15 @@
 // Game constants
 export const TILE_SIZE = 64;
-export const GRID_COLS = 20;
-export const GRID_ROWS = 12;
-export const GAME_WIDTH = TILE_SIZE * GRID_COLS;   // 1280
-export const GAME_HEIGHT = TILE_SIZE * GRID_ROWS;  // 768
+export const GRID_COLS = 40;
+export const GRID_ROWS = 24;
+export const GAME_WIDTH = TILE_SIZE * GRID_COLS;   // 2560
+export const GAME_HEIGHT = TILE_SIZE * GRID_ROWS;  // 1536
+export const VIEWPORT_WIDTH = 1280;
+export const VIEWPORT_HEIGHT = 768;
 
 // Zones
 export const PLAYER_ZONE_MAX_X = 13;   // columns 0-13 for player
-export const ENEMY_SPAWN_MIN_X = 18;   // columns 18-19 for enemy spawn
+export const ENEMY_SPAWN_MIN_X = 38;   // columns 38-39 for enemy spawn
 
 // Starting resources
 export const STARTING_GOLD = 100;
