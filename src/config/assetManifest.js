@@ -60,6 +60,8 @@ export const images = [
     { key: 'ui_btn_hover',        path: `${UI}/Buttons/Button_Hover_3Slides.png` },
     { key: 'ui_bar_base',         path: `${UI}/UI Elements/Bars/SmallBar_Base.png` },
     { key: 'ui_bar_fill',         path: `${UI}/UI Elements/Bars/SmallBar_Fill.png` },
+    { key: 'ui_bigbar_base',     path: `${UI}/UI Elements/Bars/BigBar_Base.png` },
+    { key: 'ui_bigbar_fill',     path: `${UI}/UI Elements/Bars/BigBar_Fill.png` },
     { key: 'ui_icon_coin',        path: `${UI}/UI Elements/Icons/Icon_03.png` },
     { key: 'ui_icon_sword',       path: `${UI}/UI Elements/Icons/Icon_05.png` },
     { key: 'ui_cursor_select',    path: `${UI}/UI Elements/Cursors/Cursor_04.png` },
