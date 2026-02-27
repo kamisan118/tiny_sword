@@ -40,8 +40,8 @@ export default class Barracks extends Building {
         this.uiElements.push(this.barBase);
 
         // Progress bar fill (BigBar_Fill 64×64, uses setCrop)
-        this.progressFill = this.scene.add.image(center.x - 57, btnY + 22, 'ui_bigbar_fill')
-            .setOrigin(0, 0.5).setDisplaySize(114, 18).setDepth(2001);
+        this.progressFill = this.scene.add.image(center.x - 44, btnY + 22, 'ui_bigbar_fill')
+            .setOrigin(0, 0.5).setDisplaySize(88, 14).setDepth(2001);
         this.progressFill.setCrop(0, 0, 0, 64);
         this.uiElements.push(this.progressFill);
 
