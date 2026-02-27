@@ -1,5 +1,6 @@
 import { TILE_SIZE, GRID_COLS, GRID_ROWS, PLAYER_ZONE_MAX_X } from '../config/gameConfig.js';
 import Barracks from '../entities/Barracks.js';
+import GoldMine from '../entities/GoldMine.js';
 
 export default class BuildSystem {
     constructor(scene) {
@@ -34,10 +35,13 @@ export default class BuildSystem {
         this.active = true;
         this.buildingType = type;
 
-        if (type === 'barracks') {
-            this.gridW = 3;
-            this.gridH = 4;
-            this.ghostSprite = this.scene.add.image(0, 0, 'barracks');
+        const config = { barracks: { w: 3, h: 4, tex: 'barracks' },
+                         goldmine: { w: 3, h: 2, tex: 'goldmine_active' } };
+        const c = config[type];
+        if (c) {
+            this.gridW = c.w;
+            this.gridH = c.h;
+            this.ghostSprite = this.scene.add.image(0, 0, c.tex);
             this.ghostSprite.setAlpha(0.6);
             this.ghostSprite.setDepth(2000);
         }
@@ -86,6 +90,8 @@ export default class BuildSystem {
         let building = null;
         if (this.buildingType === 'barracks') {
             building = new Barracks(this.scene, this.scene.gridSystem, gx, gy);
+        } else if (this.buildingType === 'goldmine') {
+            building = new GoldMine(this.scene, this.scene.gridSystem, gx, gy);
         }
 
         if (building) {
@@ -97,6 +103,7 @@ export default class BuildSystem {
 
     getCost() {
         if (this.buildingType === 'barracks') return Barracks.cost;
+        if (this.buildingType === 'goldmine') return GoldMine.cost;
         return 0;
     }
 

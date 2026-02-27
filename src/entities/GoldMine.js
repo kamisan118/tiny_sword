@@ -1,24 +1,22 @@
 import Building from './Building.js';
-import { GOLDMINE_CAPACITY } from '../config/gameConfig.js';
+import { GOLDMINE_COST, GOLDMINE_HP, GOLDMINE_INCOME, GOLDMINE_INCOME_INTERVAL } from '../config/gameConfig.js';
 
 export default class GoldMine extends Building {
     constructor(scene, gridSystem, gx, gy) {
-        super(scene, gridSystem, gx, gy, 3, 2, 'goldmine_active', 9999);
+        super(scene, gridSystem, gx, gy, 3, 2, 'goldmine_active', GOLDMINE_HP);
         this.type = 'goldmine';
-        this.faction = 'neutral';
-        this.goldRemaining = GOLDMINE_CAPACITY;
+        this.faction = 'player';
+        this.incomeTimer = 0;
     }
 
-    harvest(amount) {
-        const actual = Math.min(amount, this.goldRemaining);
-        this.goldRemaining -= actual;
-        if (this.goldRemaining <= 0) {
-            this.deplete();
+    static get cost() { return GOLDMINE_COST; }
+
+    update(time, delta) {
+        if (!this.alive) return;
+        this.incomeTimer += delta;
+        if (this.incomeTimer >= GOLDMINE_INCOME_INTERVAL) {
+            this.incomeTimer -= GOLDMINE_INCOME_INTERVAL;
+            this.scene.resourceSystem.addGold(GOLDMINE_INCOME);
         }
-        return actual;
-    }
-
-    deplete() {
-        this.sprite.setTexture('goldmine_inactive');
     }
 }

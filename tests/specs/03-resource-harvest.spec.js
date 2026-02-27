@@ -1,27 +1,31 @@
 import { test, expect } from '@playwright/test';
 import { waitForGameReady, getGameState, collectPageErrors } from '../helpers/gameHelper.js';
 
-test.describe('Resource Harvesting', () => {
-    test('pawn harvests gold and increases gold count', async ({ page }) => {
+test.describe('Resource Generation', () => {
+    test('gold mine auto-generates gold over time', async ({ page }) => {
         const errors = collectPageErrors(page);
         await waitForGameReady(page);
-        const state = await getGameState(page);
 
-        const pawnId = state.playerUnits[0].id;
-        const mineId = state.buildings.find(b => b.type === 'goldmine').id;
+        // Build a gold mine (costs 100)
+        await page.evaluate(() => window.gameAPI.setGold(200));
+        const result = await page.evaluate(() => window.gameAPI.buildStructure('goldmine', 7, 5));
+        expect(result.success).toBe(true);
 
-        // Command pawn to harvest
-        const ok = await page.evaluate(
-            ([uid, mid]) => window.gameAPI.commandHarvest(uid, mid),
-            [pawnId, mineId]
-        );
-        expect(ok).toBe(true);
+        const stateAfterBuild = await getGameState(page);
+        const goldAfterBuild = stateAfterBuild.gold; // 200 - 100 = 100
 
-        // Poll until gold increases (move + 3s harvest + return + deposit)
-        await page.waitForFunction(() => {
-            const s = window.gameAPI.getGameState();
-            return s.gold > 100;
-        }, { timeout: 15000 });
+        // Fast-forward the gold mine income timer
+        await page.evaluate(() => {
+            const scene = window.game.scene.getScene('GameScene');
+            const mine = scene.buildings.find(b => b.type === 'goldmine');
+            if (mine) mine.incomeTimer = 999999;
+        });
+        await page.waitForTimeout(200);
+
+        // Gold should have increased
+        await page.waitForFunction((prev) => {
+            return window.gameAPI.getGameState().gold > prev;
+        }, goldAfterBuild, { timeout: 3000 });
 
         expect(errors).toHaveLength(0);
     });

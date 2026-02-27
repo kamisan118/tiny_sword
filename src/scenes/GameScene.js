@@ -1,8 +1,6 @@
 import { TILE_SIZE, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
 import GridSystem from '../systems/GridSystem.js';
 import Castle from '../entities/Castle.js';
-import GoldMine from '../entities/GoldMine.js';
-import Pawn from '../entities/Pawn.js';
 import SelectionSystem from '../systems/SelectionSystem.js';
 import CommandSystem from '../systems/CommandSystem.js';
 import ResourceSystem from '../systems/ResourceSystem.js';
@@ -10,8 +8,6 @@ import EventBus from '../utils/EventBus.js';
 import HUD from '../ui/HUD.js';
 import BuildSystem from '../systems/BuildSystem.js';
 import BuildMenu from '../ui/BuildMenu.js';
-import Warrior from '../entities/Warrior.js';
-import UnitPanel from '../ui/UnitPanel.js';
 import CombatSystem from '../systems/CombatSystem.js';
 import WaveSystem from '../systems/WaveSystem.js';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
@@ -38,7 +34,6 @@ export default class GameScene extends Phaser.Scene {
 
         this.renderTerrain();
         this.placeStartingBuildings();
-        this.spawnStartingUnits();
 
         // Systems
         this.eventBus = new EventBus();
@@ -50,8 +45,6 @@ export default class GameScene extends Phaser.Scene {
         this.buildMenu = new BuildMenu(this);
         this.combatSystem = new CombatSystem(this);
         this.waveSystem = new WaveSystem(this);
-        this._WarriorClass = Warrior; // expose for UnitPanel
-        this.unitPanel = new UnitPanel(this);
 
         this.gameOver = false;
         this.gameResult = null; // 'victory' or 'defeat'
@@ -66,19 +59,6 @@ export default class GameScene extends Phaser.Scene {
         // Castle at grid (1, 4)
         this.castle = new Castle(this, this.gridSystem, 1, 4);
         this.buildings.push(this.castle);
-
-        // 1 Gold Mine
-        this.goldMines = [
-            new GoldMine(this, this.gridSystem, 7, 5),
-        ];
-        this.buildings.push(...this.goldMines);
-    }
-
-    spawnStartingUnits() {
-        // 2 Pawns near the castle
-        const pawn1 = new Pawn(this, this.gridSystem, 4, 8);
-        const pawn2 = new Pawn(this, this.gridSystem, 5, 8);
-        this.playerUnits.push(pawn1, pawn2);
     }
 
     renderTerrain() {

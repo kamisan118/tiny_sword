@@ -1,76 +1,83 @@
-import { GAME_WIDTH, GAME_HEIGHT, BARRACKS_COST } from '../config/gameConfig.js';
+import { GAME_WIDTH, GAME_HEIGHT, BARRACKS_COST, GOLDMINE_COST } from '../config/gameConfig.js';
 
 export default class BuildMenu {
     constructor(scene) {
         this.scene = scene;
 
-        const panelX = 640;
+        const panelX = GAME_WIDTH / 2;
         const panelY = GAME_HEIGHT - 55;
 
         const style = { fontSize: '14px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };
 
-        // Panel background
-        this.panelBg = scene.add.image(panelX, panelY, 'ui_banner_h').setScale(1.82, 0.47)
+        // Panel background (wider for two buttons)
+        this.panelBg = scene.add.image(panelX, panelY, 'ui_banner_h').setScale(3.2, 0.47)
             .setScrollFactor(0).setDepth(899);
 
-        // Barracks icon
-        this.barracksIcon = scene.add.image(panelX - 100, panelY, 'barracks')
-            .setScale(0.22).setScrollFactor(0).setDepth(901);
-
-        // Button image
-        this.btnImage = scene.add.image(panelX + 30, panelY, 'ui_btn_blue').setScale(0.9, 0.85)
+        // --- Gold Mine button (left side) ---
+        const mineX = panelX - 130;
+        this.mineIcon = scene.add.image(mineX - 70, panelY, 'goldmine_active')
+            .setScale(0.18).setScrollFactor(0).setDepth(901);
+        this.mineBtn = scene.add.image(mineX + 30, panelY, 'ui_btn_blue').setScale(0.9, 0.85)
             .setScrollFactor(0).setDepth(900).setInteractive();
-
-        // Button label
-        this.barracksLabel = scene.add.text(panelX + 30, panelY - 10, 'Barracks', style)
+        this.mineLabel = scene.add.text(mineX + 30, panelY - 10, 'Gold Mine', style)
+            .setOrigin(0.5).setScrollFactor(0).setDepth(901);
+        this.mineCostText = scene.add.text(mineX + 30, panelY + 8, `${GOLDMINE_COST} gold`, { ...style, color: '#ffdd44' })
             .setOrigin(0.5).setScrollFactor(0).setDepth(901);
 
-        // Cost label
-        this.barracksCost = scene.add.text(panelX + 30, panelY + 8, `${BARRACKS_COST} gold`, { ...style, color: '#ffdd44' })
+        this._setupButton(this.mineBtn, 'goldmine', () => this.canAffordMine);
+
+        // --- Barracks button (right side) ---
+        const brrX = panelX + 130;
+        this.barracksIcon = scene.add.image(brrX - 70, panelY, 'barracks')
+            .setScale(0.22).setScrollFactor(0).setDepth(901);
+        this.barracksBtn = scene.add.image(brrX + 30, panelY, 'ui_btn_blue').setScale(0.9, 0.85)
+            .setScrollFactor(0).setDepth(900).setInteractive();
+        this.barracksLabel = scene.add.text(brrX + 30, panelY - 10, 'Barracks', style)
+            .setOrigin(0.5).setScrollFactor(0).setDepth(901);
+        this.barracksCostText = scene.add.text(brrX + 30, panelY + 8, `${BARRACKS_COST} gold`, { ...style, color: '#ffdd44' })
             .setOrigin(0.5).setScrollFactor(0).setDepth(901);
 
-        // Track afford state
-        this.canAfford = true;
+        this._setupButton(this.barracksBtn, 'barracks', () => this.canAffordBarracks);
 
-        // Button interaction
-        this.btnImage.on('pointerover', () => {
-            if (this.canAfford) this.btnImage.setTexture('ui_btn_hover');
-        });
+        // Track afford states
+        this.canAffordMine = true;
+        this.canAffordBarracks = true;
 
-        this.btnImage.on('pointerout', () => {
-            this.btnImage.setTexture(this.canAfford ? 'ui_btn_blue' : 'ui_btn_disable');
-        });
-
-        this.btnImage.on('pointerdown', () => {
-            if (!this.canAfford) return;
-            if (scene.buildSystem.active) return;
-            this.btnImage.setTexture('ui_btn_blue_pressed');
-            scene.buildSystem.enterBuildMode('barracks');
-        });
-
-        this.btnImage.on('pointerup', () => {
-            this.btnImage.setTexture(this.canAfford ? 'ui_btn_blue' : 'ui_btn_disable');
-        });
-
-        // Update button state based on gold
-        scene.eventBus.on('goldChanged', (gold) => {
-            this.updateButtonState(gold);
-        });
-
+        // Update button states based on gold
+        scene.eventBus.on('goldChanged', (gold) => this.updateButtonState(gold));
         this.updateButtonState(scene.resourceSystem.getGold());
     }
 
+    _setupButton(btn, buildType, canAffordFn) {
+        btn.on('pointerover', () => {
+            if (canAffordFn()) btn.setTexture('ui_btn_hover');
+        });
+        btn.on('pointerout', () => {
+            btn.setTexture(canAffordFn() ? 'ui_btn_blue' : 'ui_btn_disable');
+        });
+        btn.on('pointerdown', () => {
+            if (!canAffordFn()) return;
+            if (this.scene.buildSystem.active) return;
+            btn.setTexture('ui_btn_blue_pressed');
+            this.scene.buildSystem.enterBuildMode(buildType);
+        });
+        btn.on('pointerup', () => {
+            btn.setTexture(canAffordFn() ? 'ui_btn_blue' : 'ui_btn_disable');
+        });
+    }
+
     updateButtonState(gold) {
-        this.canAfford = gold >= BARRACKS_COST;
-        if (this.canAfford) {
-            this.btnImage.setTexture('ui_btn_blue');
-            this.barracksIcon.setAlpha(1);
-            this.barracksCost.setColor('#ffdd44');
-        } else {
-            this.btnImage.setTexture('ui_btn_disable');
-            this.barracksIcon.setAlpha(0.5);
-            this.barracksCost.setColor('#aa6666');
-        }
+        // Gold Mine
+        this.canAffordMine = gold >= GOLDMINE_COST;
+        this.mineBtn.setTexture(this.canAffordMine ? 'ui_btn_blue' : 'ui_btn_disable');
+        this.mineIcon.setAlpha(this.canAffordMine ? 1 : 0.5);
+        this.mineCostText.setColor(this.canAffordMine ? '#ffdd44' : '#aa6666');
+
+        // Barracks
+        this.canAffordBarracks = gold >= BARRACKS_COST;
+        this.barracksBtn.setTexture(this.canAffordBarracks ? 'ui_btn_blue' : 'ui_btn_disable');
+        this.barracksIcon.setAlpha(this.canAffordBarracks ? 1 : 0.5);
+        this.barracksCostText.setColor(this.canAffordBarracks ? '#ffdd44' : '#aa6666');
     }
 }

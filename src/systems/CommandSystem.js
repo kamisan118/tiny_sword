@@ -6,8 +6,6 @@ export default class CommandSystem {
     issueMove(units, px, py) {
         for (const unit of units) {
             if (!unit.alive) continue;
-            unit.harvestTarget = null; // cancel harvesting
-            unit._harvestMoving = false;
             unit.moveToWithPathfinding(px, py);
         }
         this.showMoveMarker(px, py);
@@ -24,15 +22,6 @@ export default class CommandSystem {
             duration: 500,
             onComplete: () => marker.destroy()
         });
-    }
-
-    issueHarvest(units, mine) {
-        for (const unit of units) {
-            if (!unit.alive) continue;
-            if (unit.type === 'pawn' && unit.commandHarvest) {
-                unit.commandHarvest(mine, this.scene.castle);
-            }
-        }
     }
 
     issueAttack(units, target) {

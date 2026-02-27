@@ -74,20 +74,6 @@ export default class SelectionSystem {
         const clickX = pointer.worldX;
         const clickY = pointer.worldY;
 
-        // Check if right-clicked on a gold mine
-        let targetMine = null;
-        for (const building of this.scene.buildings) {
-            if (!building.alive || building.type !== 'goldmine') continue;
-            const center = building.getCenter();
-            const hw = (building.gridW * 64) / 2;
-            const hh = (building.gridH * 64) / 2;
-            if (clickX >= center.x - hw && clickX <= center.x + hw &&
-                clickY >= center.y - hh && clickY <= center.y + hh) {
-                targetMine = building;
-                break;
-            }
-        }
-
         // Check if right-clicked on an enemy unit
         let targetEnemy = null;
         for (const unit of this.scene.enemyUnits) {
@@ -100,9 +86,7 @@ export default class SelectionSystem {
         }
 
         if (this.scene.commandSystem) {
-            if (targetMine) {
-                this.scene.commandSystem.issueHarvest(this.selectedUnits, targetMine);
-            } else if (targetEnemy) {
+            if (targetEnemy) {
                 this.scene.commandSystem.issueAttack(this.selectedUnits, targetEnemy);
             } else {
                 this.scene.commandSystem.issueMove(this.selectedUnits, clickX, clickY);

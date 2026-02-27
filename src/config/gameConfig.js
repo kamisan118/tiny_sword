@@ -13,15 +13,10 @@ export const ENEMY_SPAWN_MIN_X = 18;   // columns 18-19 for enemy spawn
 export const STARTING_GOLD = 100;
 
 // Unit costs
-export const WARRIOR_COST = 75;
 export const BARRACKS_COST = 150;
+export const GOLDMINE_COST = 100;
 
 // Unit stats
-export const PAWN_HP = 50;
-export const PAWN_SPEED = 100;
-export const PAWN_HARVEST_TIME = 3000;  // ms
-export const PAWN_HARVEST_AMOUNT = 10;
-
 export const WARRIOR_HP = 100;
 export const WARRIOR_SPEED = 80;
 export const WARRIOR_DAMAGE = 15;
@@ -32,7 +27,9 @@ export const WARRIOR_PRODUCE_TIME = 10000; // ms
 // Building stats
 export const CASTLE_HP = 1000;
 export const BARRACKS_HP = 500;
-export const GOLDMINE_CAPACITY = 5000;
+export const GOLDMINE_HP = 300;
+export const GOLDMINE_INCOME = 25;          // gold per tick
+export const GOLDMINE_INCOME_INTERVAL = 5000; // ms
 
 // Wave settings
 export const WAVE_INTERVAL = 60000;  // ms

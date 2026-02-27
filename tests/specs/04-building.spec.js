@@ -6,18 +6,33 @@ test.describe('Building System', () => {
         const errors = collectPageErrors(page);
         await waitForGameReady(page);
 
-        // Give enough gold
         await page.evaluate(() => window.gameAPI.setGold(500));
 
-        // Build barracks at a free position
         const result = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
         expect(result.success).toBe(true);
         expect(result.buildingId).toBeTruthy();
 
         const state = await getGameState(page);
-        expect(state.buildings).toHaveLength(5); // 4 starting + 1 barracks
+        expect(state.buildings).toHaveLength(2); // 1 castle + 1 barracks
         expect(state.buildings.filter(b => b.type === 'barracks')).toHaveLength(1);
         expect(state.gold).toBe(350); // 500 - 150
+        expect(errors).toHaveLength(0);
+    });
+
+    test('build a gold mine via API', async ({ page }) => {
+        const errors = collectPageErrors(page);
+        await waitForGameReady(page);
+
+        await page.evaluate(() => window.gameAPI.setGold(500));
+
+        const result = await page.evaluate(() => window.gameAPI.buildStructure('goldmine', 7, 5));
+        expect(result.success).toBe(true);
+        expect(result.buildingId).toBeTruthy();
+
+        const state = await getGameState(page);
+        expect(state.buildings).toHaveLength(2); // 1 castle + 1 goldmine
+        expect(state.buildings.filter(b => b.type === 'goldmine')).toHaveLength(1);
+        expect(state.gold).toBe(400); // 500 - 100
         expect(errors).toHaveLength(0);
     });
 

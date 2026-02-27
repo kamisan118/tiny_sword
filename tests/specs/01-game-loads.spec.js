@@ -21,17 +21,15 @@ test.describe('Game Loading', () => {
         // Gold
         expect(state.gold).toBe(100);
 
-        // 2 starting pawns
-        expect(state.playerUnits).toHaveLength(2);
-        expect(state.playerUnits.every(u => u.type === 'pawn')).toBe(true);
+        // No starting units (pawns removed)
+        expect(state.playerUnits).toHaveLength(0);
 
         // No enemies yet
         expect(state.enemyUnits).toHaveLength(0);
 
-        // 4 buildings: 1 castle + 3 gold mines
-        expect(state.buildings).toHaveLength(4);
+        // 1 building: castle only (gold mines must be built manually)
+        expect(state.buildings).toHaveLength(1);
         expect(state.buildings.filter(b => b.type === 'castle')).toHaveLength(1);
-        expect(state.buildings.filter(b => b.type === 'goldmine')).toHaveLength(3);
 
         // Wave 0, not started
         expect(state.wave.current).toBe(0);

@@ -12,11 +12,6 @@ const UI = 'assets/UI Elements';
 // Spritesheet definitions: { key, path, frameWidth, frameHeight }
 export const spritesheets = [
     // --- Player units (single-row strips, 192×192 frames) ---
-    { key: 'pawn_idle',        path: `${UNITS_BLUE}/Pawn/Pawn_Idle.png`,              frameWidth: 192, frameHeight: 192 },
-    { key: 'pawn_run',         path: `${UNITS_BLUE}/Pawn/Pawn_Run.png`,               frameWidth: 192, frameHeight: 192 },
-    { key: 'pawn_interact',    path: `${UNITS_BLUE}/Pawn/Pawn_Interact Pickaxe.png`,  frameWidth: 192, frameHeight: 192 },
-    { key: 'pawn_idle_gold',   path: `${UNITS_BLUE}/Pawn/Pawn_Idle Gold.png`,         frameWidth: 192, frameHeight: 192 },
-    { key: 'pawn_run_gold',    path: `${UNITS_BLUE}/Pawn/Pawn_Run Gold.png`,          frameWidth: 192, frameHeight: 192 },
     { key: 'warrior_idle',     path: `${UNITS_BLUE}/Warrior/Warrior_Idle.png`,        frameWidth: 192, frameHeight: 192 },
     { key: 'warrior_run',      path: `${UNITS_BLUE}/Warrior/Warrior_Run.png`,         frameWidth: 192, frameHeight: 192 },
     { key: 'warrior_attack',   path: `${UNITS_BLUE}/Warrior/Warrior_Attack1.png`,     frameWidth: 192, frameHeight: 192 },

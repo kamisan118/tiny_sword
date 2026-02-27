@@ -19,7 +19,7 @@ test.describe('Combat System', () => {
         const errors = collectPageErrors(page);
         await waitForGameReady(page);
 
-        // Give gold and build barracks to produce warrior
+        // Build barracks and force warrior spawn
         await page.evaluate(() => window.gameAPI.setGold(1000));
         await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
 
@@ -27,18 +27,14 @@ test.describe('Combat System', () => {
         const enemyResult = await page.evaluate(() => window.gameAPI.spawnTestEnemy('barrel', 10, 6));
         const enemyId = enemyResult.unitId;
 
-        // Get initial enemy HP
         let state = await getGameState(page);
         const initialHp = state.enemyUnits.find(u => u.id === enemyId).hp;
 
-        // Command a pawn to attack (pawns have no damage, but let's test warrior)
-        // First produce a warrior instantly by manipulating time
+        // Force warrior spawn by advancing produce timer
         await page.evaluate(([bid]) => {
             const scene = window.game.scene.getScene('GameScene');
             const barracks = scene.buildings.find(b => b.id === bid);
-            if (barracks) {
-                barracks.produceTimer = 999999; // force complete
-            }
+            if (barracks) barracks.produceTimer = 999999;
         }, [state.buildings.find(b => b.type === 'barracks').id]);
 
         await page.waitForTimeout(500);
