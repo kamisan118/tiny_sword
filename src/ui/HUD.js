@@ -9,11 +9,12 @@ export default class HUD {
                         stroke: '#3a2a14', strokeThickness: 3 };
 
         // --- Left: Gold display ---
-        scene.add.image(108, 30, 'ui_carved').setScale(1.15, 0.8)
+        const pad = 16;
+        scene.add.image(108 + pad, 30, 'ui_carved').setScale(1.15, 0.8)
             .setScrollFactor(0).setDepth(999);
-        scene.add.image(30, 30, 'ui_icon_coin').setScale(0.5)
+        scene.add.image(30 + pad, 30, 'ui_icon_coin').setScale(0.5)
             .setScrollFactor(0).setDepth(1000);
-        this.goldText = scene.add.text(58, 21, '100', style)
+        this.goldText = scene.add.text(58 + pad, 21, '100', style)
             .setScrollFactor(0).setDepth(1000);
 
         // --- Center: Wave display ---
@@ -23,9 +24,9 @@ export default class HUD {
             .setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(1000);
 
         // --- Right: Timer display ---
-        scene.add.image(1172, 30, 'ui_carved').setScale(1.15, 0.8)
+        scene.add.image(1172 - pad, 30, 'ui_carved').setScale(1.15, 0.8)
             .setScrollFactor(0).setDepth(999);
-        this.timerText = scene.add.text(1245, 21, 'Next wave: 60s', style)
+        this.timerText = scene.add.text(1245 - pad, 21, 'Next wave: 60s', style)
             .setOrigin(1, 0).setScrollFactor(0).setDepth(1000);
 
         // Listen for gold changes
