@@ -10,6 +10,7 @@ import BuildSystem from '../systems/BuildSystem.js';
 import BuildMenu from '../ui/BuildMenu.js';
 import CombatSystem from '../systems/CombatSystem.js';
 import WaveSystem from '../systems/WaveSystem.js';
+import CameraSystem from '../systems/CameraSystem.js';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
 import GameAPI from '../api/GameAPI.js';
 
@@ -50,6 +51,7 @@ export default class GameScene extends Phaser.Scene {
         this.buildMenu = new BuildMenu(this);
         this.combatSystem = new CombatSystem(this);
         this.waveSystem = new WaveSystem(this);
+        this.cameraSystem = new CameraSystem(this);
 
         this.gameOver = false;
         this.gameResult = null; // 'victory' or 'defeat'
@@ -128,6 +130,9 @@ export default class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        // Update camera scrolling (works even when game is over)
+        this.cameraSystem.update(time, delta);
+
         if (this.gameOver) return;
 
         // Update all player units
