@@ -1,11 +1,11 @@
-import { GAME_WIDTH, GAME_HEIGHT, BARRACKS_COST, GOLDMINE_COST } from '../config/gameConfig.js';
+import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT, BARRACKS_COST, GOLDMINE_COST } from '../config/gameConfig.js';
 
 export default class BuildMenu {
     constructor(scene) {
         this.scene = scene;
 
-        const panelX = GAME_WIDTH / 2;
-        const panelY = GAME_HEIGHT - 25;
+        const panelX = VIEWPORT_WIDTH / 2;
+        const panelY = VIEWPORT_HEIGHT - 25;
 
         const style = { fontSize: '14px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };

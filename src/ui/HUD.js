@@ -1,5 +1,3 @@
-import { GAME_WIDTH } from '../config/gameConfig.js';
-
 export default class HUD {
     constructor(scene, eventBus) {
         this.scene = scene;

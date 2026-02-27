@@ -181,11 +181,11 @@ export default class GameScene extends Phaser.Scene {
         this.gameResult = result;
         this.waveSystem.gameOver = true;
 
-        const cx = GAME_WIDTH / 2;
-        const cy = GAME_HEIGHT / 2;
+        const cx = VIEWPORT_WIDTH / 2;
+        const cy = VIEWPORT_HEIGHT / 2;
 
         // Darken overlay
-        const overlay = this.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6);
+        const overlay = this.add.rectangle(cx, cy, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, 0x000000, 0.6);
         overlay.setScrollFactor(0).setDepth(5000);
 
         // 9-slice RegularPaper panel
