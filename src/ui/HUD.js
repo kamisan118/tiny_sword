@@ -15,6 +15,15 @@ export default class HUD {
         this.goldText = scene.add.text(58 + pad, 21, '100', style)
             .setScrollFactor(0).setDepth(1000);
 
+        // --- Left: Population display (next to gold) ---
+        const popOffsetX = 220;
+        const carved1b = scene.add.image(108 + pad + popOffsetX, 30, 'ui_carved').setScale(1.15, 0.8)
+            .setScrollFactor(0).setDepth(999);
+        const swordIcon = scene.add.image(30 + pad + popOffsetX, 30, 'ui_icon_sword').setScale(0.5)
+            .setScrollFactor(0).setDepth(1000);
+        this.popText = scene.add.text(58 + pad + popOffsetX, 21, '0/10', style)
+            .setScrollFactor(0).setDepth(1000);
+
         // --- Center: Wave display ---
         const ribbon = scene.add.image(640, 28, 'ui_ribbon_yellow').setScale(1.3, 0.85)
             .setScrollFactor(0).setDepth(999);
@@ -30,6 +39,11 @@ export default class HUD {
         // Listen for gold changes
         eventBus.on('goldChanged', (gold) => {
             this.goldText.setText(`${gold}`);
+        });
+
+        // Listen for population changes
+        eventBus.on('popChanged', (used, cap) => {
+            this.popText.setText(`${used}/${cap}`);
         });
 
         // Listen for wave changes

@@ -129,8 +129,13 @@ export default class GameScene extends Phaser.Scene {
         // Update wave system
         this.waveSystem.update(time, delta);
 
-        // Clean up dead units
+        // Clean up dead units (free population for dead player units)
+        const beforeCount = this.playerUnits.length;
         this.playerUnits = this.playerUnits.filter(u => u.alive);
+        const deadCount = beforeCount - this.playerUnits.length;
+        if (deadCount > 0) {
+            this.resourceSystem.freePopulation(deadCount);
+        }
         this.enemyUnits = this.enemyUnits.filter(u => u.alive);
 
         // Check win/lose conditions
