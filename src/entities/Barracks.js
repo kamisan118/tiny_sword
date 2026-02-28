@@ -87,6 +87,10 @@ export default class Barracks extends Building {
 
     _startProduction() {
         if (!this.scene.resourceSystem.spendGold(WARRIOR_COST)) return;
+        if (!this.scene.resourceSystem.usePopulation(1)) {
+            this.scene.resourceSystem.addGold(WARRIOR_COST); // refund
+            return;
+        }
         this.produceUnit(() => {
             const cell = this.scene.gridSystem.findAdjacentFreeCell(
                 this.gx, this.gy, this.gridW, this.gridH
@@ -119,7 +123,8 @@ export default class Barracks extends Building {
     update(time, delta) {
         // Update afford state
         if (this.scene.resourceSystem) {
-            this.canAfford = this.scene.resourceSystem.getGold() >= WARRIOR_COST;
+            this.canAfford = this.scene.resourceSystem.getGold() >= WARRIOR_COST
+                          && this.scene.resourceSystem.canAffordPop(1);
             this._updateBtnTexture();
         }
 
