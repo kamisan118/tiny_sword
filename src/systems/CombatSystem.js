@@ -1,11 +1,9 @@
-import { TILE_SIZE } from '../config/gameConfig.js';
-
 export default class CombatSystem {
     constructor(scene) {
         this.scene = scene;
     }
 
-    update(time, delta) {
+    update(_time, _delta) {
         // Clean up dead references from attack targets
         for (const unit of this.scene.playerUnits) {
             if (unit.attackTarget && !unit.attackTarget.alive) {

@@ -1,4 +1,4 @@
-import { TILE_SIZE, GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, CASTLE_GX, CASTLE_GY, GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
+import { GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, CASTLE_GX, CASTLE_GY, GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
 import GridSystem from '../systems/GridSystem.js';
 import Castle from '../entities/Castle.js';
 import SelectionSystem from '../systems/SelectionSystem.js';
@@ -174,13 +174,13 @@ export default class GameScene extends Phaser.Scene {
         const titleStyle = { fontSize: '52px', color: result === 'victory' ? '#ffdd44' : '#ff4444',
                              fontFamily: 'Arial', stroke: '#000000', strokeThickness: 6 };
         const title = result === 'victory' ? 'VICTORY' : 'DEFEAT';
-        const titleText = this.add.text(cx, cy - 50, title, titleStyle)
+        this.add.text(cx, cy - 50, title, titleStyle)
             .setOrigin(0.5).setScrollFactor(0).setDepth(5002);
 
         // Play Again button using game UI assets
         const btnImg = this.add.image(cx, cy + 40, 'ui_btn_blue')
             .setScale(1.2, 0.9).setScrollFactor(0).setDepth(5002).setInteractive();
-        const btnLabel = this.add.text(cx, cy + 38, 'Play Again', {
+        this.add.text(cx, cy + 38, 'Play Again', {
             fontSize: '22px', color: '#fef3c0', fontFamily: 'Arial',
             stroke: '#3a2a14', strokeThickness: 3
         }).setOrigin(0.5).setScrollFactor(0).setDepth(5003);

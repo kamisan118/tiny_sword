@@ -48,7 +48,7 @@ export default class GoblinTorch extends Unit {
         super.update(time, delta);
     }
 
-    updateAI(time, delta) {
+    updateAI(time, _delta) {
         // Always scan for nearby player units (priority target)
         let closestUnit = null;
         let closestUnitDist = 3 * TILE_SIZE;

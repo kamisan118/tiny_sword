@@ -15,7 +15,7 @@ export default class Tower extends Building {
 
     static get cost() { return TOWER_COST; }
 
-    update(time, delta) {
+    update(time, _delta) {
         if (!this.alive) return;
 
         // Find or validate target

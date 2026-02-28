@@ -8,8 +8,6 @@ export const UnitState = {
     IDLE: 'idle',
     MOVING: 'moving',
     ATTACKING: 'attacking',
-    HARVESTING: 'harvesting',
-    RETURNING: 'returning',
     DEAD: 'dead'
 };
 
@@ -338,7 +336,7 @@ export default class Unit {
         explosion.once('animationcomplete', () => explosion.destroy());
     }
 
-    playAnim(name) {
+    playAnim(_name) {
         // Override in subclass
     }
 

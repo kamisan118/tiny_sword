@@ -46,7 +46,7 @@ export default class GoblinTNT extends Unit {
         super.update(time, delta);
     }
 
-    updateAI(time, delta) {
+    updateAI(_time, _delta) {
         if (this.hasExploded) return;
 
         if (this.attackTarget && this.attackTarget.alive) {
