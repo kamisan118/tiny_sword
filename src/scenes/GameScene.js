@@ -107,7 +107,7 @@ export default class GameScene extends Phaser.Scene {
             return img;
         };
 
-        add9(w / 2, h / 2, 'sp_c', w - 2 * cs, h - 2 * cs);       // center
+        // No center fill — game camera content shows through
         add9(w / 2, cs / 2, 'sp_t', w - 2 * cs, cs);               // top
         add9(w / 2, h - cs / 2, 'sp_b', w - 2 * cs, cs);           // bottom
         add9(cs / 2, h / 2, 'sp_l', cs, h - 2 * cs);               // left
