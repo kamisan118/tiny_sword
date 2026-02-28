@@ -1,4 +1,4 @@
-import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
+import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT, TILE_SIZE } from '../config/gameConfig.js';
 
 const SCROLL_SPEED = 300; // pixels per second
 const ARROW_SIZE = 32;
@@ -23,12 +23,12 @@ export default class CameraSystem {
         const hw = VIEWPORT_WIDTH / 2;
         const hh = VIEWPORT_HEIGHT / 2;
 
-        // Create 4 triangle arrow buttons using Graphics
+        // Create 4 triangle arrow buttons at inner edges of grass viewport
         this.arrows = {
-            up:    this._createArrow(s, hw, ARROW_MARGIN, 0),
-            down:  this._createArrow(s, hw, VIEWPORT_HEIGHT - ARROW_MARGIN, Math.PI),
-            left:  this._createArrow(s, ARROW_MARGIN, hh, -Math.PI / 2),
-            right: this._createArrow(s, VIEWPORT_WIDTH - ARROW_MARGIN, hh, Math.PI / 2),
+            up:    this._createArrow(s, hw, TILE_SIZE + ARROW_MARGIN, 0),
+            down:  this._createArrow(s, hw, VIEWPORT_HEIGHT - TILE_SIZE - ARROW_MARGIN, Math.PI),
+            left:  this._createArrow(s, TILE_SIZE + ARROW_MARGIN, hh, -Math.PI / 2),
+            right: this._createArrow(s, VIEWPORT_WIDTH - TILE_SIZE - ARROW_MARGIN, hh, Math.PI / 2),
         };
 
         // Bind pointerdown / pointerup / pointerout
@@ -49,11 +49,13 @@ export default class CameraSystem {
         g.setDepth(ARROW_DEPTH);
         g.setPosition(x, y);
         g.rotation = rotation;
+        scene.showOnBgCamera(g);
 
         // Hit area for interaction
         const hitZone = scene.add.zone(x, y, ARROW_SIZE * 1.5, ARROW_SIZE * 1.5)
             .setScrollFactor(0).setDepth(ARROW_DEPTH).setInteractive();
         hitZone._arrowGraphics = g;
+        scene.showOnBgCamera(hitZone);
 
         return hitZone;
     }
@@ -101,13 +103,18 @@ export default class CameraSystem {
 
         // Update arrow visibility based on camera bounds
         const cam = this.camera;
-        this.arrows.left.visible = cam.scrollX > 0;
+        const minX = cam._bounds.x;
+        const minY = cam._bounds.y;
+        const maxX = cam._bounds.right - cam.width;
+        const maxY = cam._bounds.bottom - cam.height;
+
+        this.arrows.left.visible = cam.scrollX > minX;
         this.arrows.left._arrowGraphics.visible = this.arrows.left.visible;
-        this.arrows.right.visible = cam.scrollX < GAME_WIDTH - VIEWPORT_WIDTH;
+        this.arrows.right.visible = cam.scrollX < maxX;
         this.arrows.right._arrowGraphics.visible = this.arrows.right.visible;
-        this.arrows.up.visible = cam.scrollY > 0;
+        this.arrows.up.visible = cam.scrollY > minY;
         this.arrows.up._arrowGraphics.visible = this.arrows.up.visible;
-        this.arrows.down.visible = cam.scrollY < GAME_HEIGHT - VIEWPORT_HEIGHT;
+        this.arrows.down.visible = cam.scrollY < maxY;
         this.arrows.down._arrowGraphics.visible = this.arrows.down.visible;
     }
 }

@@ -33,11 +33,27 @@ export default class GameScene extends Phaser.Scene {
         this.playerUnits = [];
         this.enemyUnits = [];
 
-        this.renderTerrain();
+        // --- Dual camera setup ---
+        const borderSize = TILE_SIZE;
+        const innerW = VIEWPORT_WIDTH - 2 * borderSize;
+        const innerH = VIEWPORT_HEIGHT - 2 * borderSize;
 
-        // Camera and physics world bounds for scrollable map
-        this.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        // Main camera = game camera (index 0, renders first, handles input)
+        this.cameras.main.setViewport(borderSize, borderSize, innerW, innerH);
+        this.cameras.main.setBounds(
+            borderSize, borderSize,
+            GAME_WIDTH - 2 * borderSize, GAME_HEIGHT - 2 * borderSize
+        );
         this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        // Background camera (index 1, renders second = on top in border zone)
+        this.bgCamera = this.cameras.add(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        this.bgCamera.setScroll(0, 0);
+
+        // Auto-hide new game objects from bgCamera
+        this._wrapAddMethods();
+
+        this.renderTerrain();
 
         this.placeStartingBuildings();
 
@@ -83,10 +99,13 @@ export default class GameScene extends Phaser.Scene {
         tex.add('sp_br', 0, 256, 256, 55, 43);
 
         const cs = 64; // corner display size
-        const w = GAME_WIDTH, h = GAME_HEIGHT;
-        const add9 = (x, y, frame, dw, dh) =>
-            this.add.image(x, y, 'ui_special_paper', frame)
+        const w = VIEWPORT_WIDTH, h = VIEWPORT_HEIGHT;
+        const add9 = (x, y, frame, dw, dh) => {
+            const img = this.add.image(x, y, 'ui_special_paper', frame)
                 .setDisplaySize(dw, dh).setDepth(-1);
+            this.showOnBgCamera(img);
+            return img;
+        };
 
         add9(w / 2, h / 2, 'sp_c', w - 2 * cs, h - 2 * cs);       // center
         add9(w / 2, cs / 2, 'sp_t', w - 2 * cs, cs);               // top
@@ -187,6 +206,7 @@ export default class GameScene extends Phaser.Scene {
         // Darken overlay
         const overlay = this.add.rectangle(cx, cy, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, 0x000000, 0.6);
         overlay.setScrollFactor(0).setDepth(5000);
+        this.showOnBgCamera(overlay);
 
         // 9-slice RegularPaper panel
         this._createRegularPaperPanel(cx, cy, 400, 250);
@@ -195,16 +215,19 @@ export default class GameScene extends Phaser.Scene {
         const titleStyle = { fontSize: '52px', color: result === 'victory' ? '#ffdd44' : '#ff4444',
                              fontFamily: 'Arial', stroke: '#000000', strokeThickness: 6 };
         const title = result === 'victory' ? 'VICTORY' : 'DEFEAT';
-        this.add.text(cx, cy - 50, title, titleStyle)
+        const titleText = this.add.text(cx, cy - 50, title, titleStyle)
             .setOrigin(0.5).setScrollFactor(0).setDepth(5002);
+        this.showOnBgCamera(titleText);
 
         // Play Again button using game UI assets
         const btnImg = this.add.image(cx, cy + 40, 'ui_btn_blue')
             .setScale(1.2, 0.9).setScrollFactor(0).setDepth(5002).setInteractive();
+        this.showOnBgCamera(btnImg);
         const btnLabel = this.add.text(cx, cy + 38, 'Play Again', {
             fontSize: '22px', color: '#fef3c0', fontFamily: 'Arial',
             stroke: '#3a2a14', strokeThickness: 3
         }).setOrigin(0.5).setScrollFactor(0).setDepth(5003);
+        this.showOnBgCamera(btnLabel);
 
         btnImg.on('pointerover', () => btnImg.setTexture('ui_btn_hover'));
         btnImg.on('pointerout', () => btnImg.setTexture('ui_btn_blue'));
@@ -235,12 +258,16 @@ export default class GameScene extends Phaser.Scene {
         const y1 = cy - h / 2, y2 = cy + h / 2;
 
         // Solid fill behind 9-slice to prevent dark overlay bleeding through
-        this.add.rectangle(cx, cy, w - 20, h - 20, 0xeee1c6)
+        const fill = this.add.rectangle(cx, cy, w - 20, h - 20, 0xeee1c6)
             .setScrollFactor(0).setDepth(dep);
+        this.showOnBgCamera(fill);
 
-        const add9 = (x, y, frame, dw, dh) =>
-            this.add.image(x, y, 'ui_regular_paper', frame)
+        const add9 = (x, y, frame, dw, dh) => {
+            const img = this.add.image(x, y, 'ui_regular_paper', frame)
                 .setDisplaySize(dw, dh).setScrollFactor(0).setDepth(dep + 0.1);
+            this.showOnBgCamera(img);
+            return img;
+        };
 
         add9(cx, cy, 'rp_c', w - 2 * cs, h - 2 * cs);
         add9(cx, y1 + cs / 2, 'rp_t', w - 2 * cs, cs);
@@ -251,5 +278,23 @@ export default class GameScene extends Phaser.Scene {
         add9(x2 - cs / 2, y1 + cs / 2, 'rp_tr', cs, cs);
         add9(x1 + cs / 2, y2 - cs / 2, 'rp_bl', cs, cs);
         add9(x2 - cs / 2, y2 - cs / 2, 'rp_br', cs, cs);
+    }
+
+    _wrapAddMethods() {
+        const bgCamId = this.bgCamera.id;
+        const methods = ['image', 'sprite', 'rectangle', 'circle', 'graphics', 'text', 'zone'];
+        for (const method of methods) {
+            const original = this.add[method].bind(this.add);
+            this.add[method] = (...args) => {
+                const obj = original(...args);
+                obj.cameraFilter |= bgCamId;
+                return obj;
+            };
+        }
+    }
+
+    showOnBgCamera(obj) {
+        obj.cameraFilter = this.cameras.main.id;
+        return obj;
     }
 }

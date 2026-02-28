@@ -36,6 +36,11 @@ export default class BuildMenu {
 
         this._setupButton(this.barracksBtn, 'barracks', () => this.canAffordBarracks);
 
+        // Show all BuildMenu elements on bgCamera
+        [this.mineIcon, this.mineBtn, this.mineLabel, this.mineCostText,
+         this.barracksIcon, this.barracksBtn, this.barracksLabel, this.barracksCostText]
+            .forEach(el => scene.showOnBgCamera(el));
+
         // Track afford states
         this.canAffordMine = true;
         this.canAffordBarracks = true;
