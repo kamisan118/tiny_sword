@@ -16,6 +16,16 @@ export const spritesheets = [
     { key: 'warrior_run',      path: `${UNITS_BLUE}/Warrior/Warrior_Run.png`,         frameWidth: 192, frameHeight: 192 },
     { key: 'warrior_attack',   path: `${UNITS_BLUE}/Warrior/Warrior_Attack1.png`,     frameWidth: 192, frameHeight: 192 },
 
+    // --- Archer ---
+    { key: 'archer_idle',      path: `${UNITS_BLUE}/Archer/Archer_Idle.png`,         frameWidth: 192, frameHeight: 192 },
+    { key: 'archer_run',       path: `${UNITS_BLUE}/Archer/Archer_Run.png`,          frameWidth: 192, frameHeight: 192 },
+    { key: 'archer_shoot',     path: `${UNITS_BLUE}/Archer/Archer_Shoot.png`,        frameWidth: 192, frameHeight: 192 },
+
+    // --- Monk ---
+    { key: 'monk_idle',        path: `${UNITS_BLUE}/Monk/Idle.png`,                  frameWidth: 192, frameHeight: 192 },
+    { key: 'monk_run',         path: `${UNITS_BLUE}/Monk/Run.png`,                   frameWidth: 192, frameHeight: 192 },
+    { key: 'monk_heal',        path: `${UNITS_BLUE}/Monk/Heal.png`,                  frameWidth: 192, frameHeight: 192 },
+
     // --- Enemy units (multi-row sheets) ---
     { key: 'goblin_torch',     path: `${GOBLINS}/Torch/Red/Torch_Red.png`,   frameWidth: 192, frameHeight: 192 },
     { key: 'goblin_barrel',    path: `${GOBLINS}/Barrel/Red/Barrel_Red.png`,  frameWidth: 128, frameHeight: 128 },
@@ -43,6 +53,13 @@ export const images = [
     { key: 'castle_construction',  path: `${KNIGHTS_BUILDINGS}/Castle/Castle_Construction.png` },
     { key: 'castle_destroyed',     path: `${KNIGHTS_BUILDINGS}/Castle/Castle_Destroyed.png` },
     { key: 'barracks',             path: `${BLUE_BUILDINGS}/Barracks.png` },
+    { key: 'tower',                path: `${BLUE_BUILDINGS}/Tower.png` },
+    { key: 'archery',              path: `${BLUE_BUILDINGS}/Archery.png` },
+    { key: 'house',                path: `${BLUE_BUILDINGS}/House1.png` },
+    { key: 'monastery',            path: `${BLUE_BUILDINGS}/Monastery.png` },
+
+    // --- Arrow projectile ---
+    { key: 'arrow',                path: `${UNITS_BLUE}/Archer/Arrow.png` },
 
     // --- Gold Mine ---
     { key: 'goldmine_active',      path: `${RESOURCES}/Gold Mine/GoldMine_Active.png` },
