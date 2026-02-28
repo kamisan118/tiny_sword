@@ -28,7 +28,6 @@ src/
 │   ├── Warrior.js             # 近戰戰士
 │   ├── Archer.js              # 遠程弓箭手
 │   ├── Monk.js                # 治療僧侶
-│   ├── Pawn.js                # 村民 (未啟用)
 │   ├── GoblinTorch.js         # 敵方近戰
 │   ├── GoblinBarrel.js        # 敵方坦克
 │   ├── GoblinTNT.js           # 敵方爆破
