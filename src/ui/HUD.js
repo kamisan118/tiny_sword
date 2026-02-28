@@ -27,10 +27,6 @@ export default class HUD {
         this.timerText = scene.add.text(1245 - pad, 21, 'Next wave: 60s', style)
             .setOrigin(1, 0).setScrollFactor(0).setDepth(1000);
 
-        // Show all HUD elements on bgCamera
-        [carved1, coinIcon, this.goldText, ribbon, this.waveText, carved2, this.timerText]
-            .forEach(el => scene.showOnBgCamera(el));
-
         // Listen for gold changes
         eventBus.on('goldChanged', (gold) => {
             this.goldText.setText(`${gold}`);

@@ -1,4 +1,4 @@
-import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT, TILE_SIZE } from '../config/gameConfig.js';
+import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from '../config/gameConfig.js';
 
 const SCROLL_SPEED = 300; // pixels per second
 const EDGE_THRESHOLD = 40; // pixels from edge to trigger scrolling
@@ -25,10 +25,10 @@ export default class CameraSystem {
         const mx = pointer.x;
         const my = pointer.y;
 
-        const left = TILE_SIZE;
-        const right = VIEWPORT_WIDTH - TILE_SIZE;
-        const top = TILE_SIZE;
-        const bottom = VIEWPORT_HEIGHT - TILE_SIZE;
+        const left = 1;
+        const right = VIEWPORT_WIDTH - 1;
+        const top = 1;
+        const bottom = VIEWPORT_HEIGHT - 1;
 
         if (mx >= left && mx <= right && my >= top && my <= bottom) {
             // Pointer is inside the grass viewport area

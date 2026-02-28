@@ -1,4 +1,4 @@
-import { TILE_SIZE, GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, CASTLE_GX, CASTLE_GY } from '../config/gameConfig.js';
+import { TILE_SIZE, GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, CASTLE_GX, CASTLE_GY, GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
 import GridSystem from '../systems/GridSystem.js';
 import Castle from '../entities/Castle.js';
 import SelectionSystem from '../systems/SelectionSystem.js';
@@ -11,7 +11,6 @@ import BuildMenu from '../ui/BuildMenu.js';
 import CombatSystem from '../systems/CombatSystem.js';
 import WaveSystem from '../systems/WaveSystem.js';
 import CameraSystem from '../systems/CameraSystem.js';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
 import GameAPI from '../api/GameAPI.js';
 
 // Tilemap_Flat frame indices (10 cols × 4 rows)
@@ -33,25 +32,10 @@ export default class GameScene extends Phaser.Scene {
         this.playerUnits = [];
         this.enemyUnits = [];
 
-        // --- Dual camera setup ---
-        const borderSize = TILE_SIZE;
-        const innerW = VIEWPORT_WIDTH - 2 * borderSize;
-        const innerH = VIEWPORT_HEIGHT - 2 * borderSize;
-
-        // Main camera = game camera (index 0, renders first, handles input)
-        this.cameras.main.setViewport(borderSize, borderSize, innerW, innerH);
-        this.cameras.main.setBounds(
-            borderSize, borderSize,
-            GAME_WIDTH - 2 * borderSize, GAME_HEIGHT - 2 * borderSize
-        );
+        // Camera setup
+        this.cameras.main.setViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        this.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
         this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
-
-        // Background camera (index 1, renders second = on top in border zone)
-        this.bgCamera = this.cameras.add(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-        this.bgCamera.setScroll(0, 0);
-
-        // Auto-hide new game objects from bgCamera
-        this._wrapAddMethods();
 
         this.renderTerrain();
 
@@ -68,7 +52,7 @@ export default class GameScene extends Phaser.Scene {
         this.selectionSystem = new SelectionSystem(this);
         this.hud = new HUD(this, this.eventBus);
         this.buildSystem = new BuildSystem(this);
-        this.buildMenu = new BuildMenu(this);
+        this.buildMenu = new BuildMenu(this, this.castle);
         this.combatSystem = new CombatSystem(this);
         this.waveSystem = new WaveSystem(this);
         this.cameraSystem = new CameraSystem(this);
@@ -89,50 +73,17 @@ export default class GameScene extends Phaser.Scene {
     }
 
     renderTerrain() {
-        // Full-screen 9-slice SpecialPaper background (replaces water)
-        // Define custom frames from exact pixel positions in the spritesheet
-        const tex = this.textures.get('ui_special_paper');
-        tex.add('sp_tl', 0, 10, 21, 54, 43);
-        tex.add('sp_t',  0, 128, 21, 64, 43);
-        tex.add('sp_tr', 0, 256, 21, 54, 43);
-        tex.add('sp_l',  0, 10, 128, 54, 64);
-        tex.add('sp_c',  0, 128, 128, 64, 64);
-        tex.add('sp_r',  0, 256, 128, 54, 64);
-        tex.add('sp_bl', 0, 10, 256, 54, 43);
-        tex.add('sp_b',  0, 128, 256, 64, 43);
-        tex.add('sp_br', 0, 256, 256, 55, 43);
-
-        const cs = 64; // corner display size
-        const w = VIEWPORT_WIDTH, h = VIEWPORT_HEIGHT;
-        const add9 = (x, y, frame, dw, dh) => {
-            const img = this.add.image(x, y, 'ui_special_paper', frame)
-                .setDisplaySize(dw, dh).setDepth(-1);
-            this.showOnBgCamera(img);
-            return img;
-        };
-
-        // No center fill — game camera content shows through
-        add9(w / 2, cs / 2, 'sp_t', w - 2 * cs, cs);               // top
-        add9(w / 2, h - cs / 2, 'sp_b', w - 2 * cs, cs);           // bottom
-        add9(cs / 2, h / 2, 'sp_l', cs, h - 2 * cs);               // left
-        add9(w - cs / 2, h / 2, 'sp_r', cs, h - 2 * cs);           // right
-        add9(cs / 2, cs / 2, 'sp_tl', cs, cs);                      // TL
-        add9(w - cs / 2, cs / 2, 'sp_tr', cs, cs);                  // TR
-        add9(cs / 2, h - cs / 2, 'sp_bl', cs, cs);                  // BL
-        add9(w - cs / 2, h - cs / 2, 'sp_br', cs, cs);              // BR
-
-        // Grass island — leave 1 tile water border on edges
-        const grassLeft = 1;
-        const grassRight = GRID_COLS - 2;
-        const grassTop = 1;
-        const grassBottom = GRID_ROWS - 2;
+        // Grass fills entire grid
+        const grassLeft = 0;
+        const grassRight = GRID_COLS - 1;
+        const grassTop = 0;
+        const grassBottom = GRID_ROWS - 1;
 
         for (let gy = grassTop; gy <= grassBottom; gy++) {
             for (let gx = grassLeft; gx <= grassRight; gx++) {
                 const { x, y } = this.gridSystem.gridToPixel(gx, gy);
                 let frame = GRASS.C;
 
-                // Determine edge/corner
                 const isTop = gy === grassTop;
                 const isBottom = gy === grassBottom;
                 const isLeft = gx === grassLeft;
@@ -210,7 +161,6 @@ export default class GameScene extends Phaser.Scene {
         // Darken overlay
         const overlay = this.add.rectangle(cx, cy, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, 0x000000, 0.6);
         overlay.setScrollFactor(0).setDepth(5000);
-        this.showOnBgCamera(overlay);
 
         // 9-slice RegularPaper panel
         this._createRegularPaperPanel(cx, cy, 400, 250);
@@ -221,17 +171,14 @@ export default class GameScene extends Phaser.Scene {
         const title = result === 'victory' ? 'VICTORY' : 'DEFEAT';
         const titleText = this.add.text(cx, cy - 50, title, titleStyle)
             .setOrigin(0.5).setScrollFactor(0).setDepth(5002);
-        this.showOnBgCamera(titleText);
 
         // Play Again button using game UI assets
         const btnImg = this.add.image(cx, cy + 40, 'ui_btn_blue')
             .setScale(1.2, 0.9).setScrollFactor(0).setDepth(5002).setInteractive();
-        this.showOnBgCamera(btnImg);
         const btnLabel = this.add.text(cx, cy + 38, 'Play Again', {
             fontSize: '22px', color: '#fef3c0', fontFamily: 'Arial',
             stroke: '#3a2a14', strokeThickness: 3
         }).setOrigin(0.5).setScrollFactor(0).setDepth(5003);
-        this.showOnBgCamera(btnLabel);
 
         btnImg.on('pointerover', () => btnImg.setTexture('ui_btn_hover'));
         btnImg.on('pointerout', () => btnImg.setTexture('ui_btn_blue'));
@@ -262,15 +209,12 @@ export default class GameScene extends Phaser.Scene {
         const y1 = cy - h / 2, y2 = cy + h / 2;
 
         // Solid fill behind 9-slice to prevent dark overlay bleeding through
-        const fill = this.add.rectangle(cx, cy, w - 20, h - 20, 0xeee1c6)
+        this.add.rectangle(cx, cy, w - 20, h - 20, 0xeee1c6)
             .setScrollFactor(0).setDepth(dep);
-        this.showOnBgCamera(fill);
 
         const add9 = (x, y, frame, dw, dh) => {
-            const img = this.add.image(x, y, 'ui_regular_paper', frame)
+            return this.add.image(x, y, 'ui_regular_paper', frame)
                 .setDisplaySize(dw, dh).setScrollFactor(0).setDepth(dep + 0.1);
-            this.showOnBgCamera(img);
-            return img;
         };
 
         add9(cx, cy, 'rp_c', w - 2 * cs, h - 2 * cs);
@@ -284,21 +228,4 @@ export default class GameScene extends Phaser.Scene {
         add9(x2 - cs / 2, y2 - cs / 2, 'rp_br', cs, cs);
     }
 
-    _wrapAddMethods() {
-        const bgCamId = this.bgCamera.id;
-        const methods = ['image', 'sprite', 'rectangle', 'circle', 'graphics', 'text', 'zone'];
-        for (const method of methods) {
-            const original = this.add[method].bind(this.add);
-            this.add[method] = (...args) => {
-                const obj = original(...args);
-                obj.cameraFilter |= bgCamId;
-                return obj;
-            };
-        }
-    }
-
-    showOnBgCamera(obj) {
-        obj.cameraFilter = this.cameras.main.id;
-        return obj;
-    }
 }

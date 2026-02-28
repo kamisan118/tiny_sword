@@ -54,8 +54,8 @@ export default class BuildSystem {
 
         const gs = this.scene.gridSystem;
         // Grass area: 1 tile border
-        const gLeft = 1, gRight = GRID_COLS - 2;
-        const gTop = 1, gBottom = GRID_ROWS - 2;
+        const gLeft = 0, gRight = GRID_COLS - 1;
+        const gTop = 0, gBottom = GRID_ROWS - 1;
 
         // Draw cell tints
         for (let gy = gTop; gy <= gBottom; gy++) {
@@ -115,7 +115,7 @@ export default class BuildSystem {
 
     canPlaceAt(gx, gy) {
         // Must be within grass area (1 tile border)
-        if (gx < 1 || gy < 1 || gx + this.gridW > GRID_COLS - 1 || gy + this.gridH > GRID_ROWS - 1) return false;
+        if (gx < 0 || gy < 0 || gx + this.gridW > GRID_COLS || gy + this.gridH > GRID_ROWS) return false;
 
         // Must be free
         return this.scene.gridSystem.isFree(gx, gy, this.gridW, this.gridH);

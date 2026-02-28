@@ -6,15 +6,15 @@ test.describe('Scrollable Map', () => {
         await waitForGameReady(page);
 
         const initial = await page.evaluate(() => window.gameAPI.getCameraState());
-        // Castle center at (1248, 768), viewport 1152x640 → scroll = (672, 448)
-        expect(initial.scrollX).toBe(672);
-        expect(initial.scrollY).toBe(448);
-        expect(initial.viewportWidth).toBe(1152);
-        expect(initial.viewportHeight).toBe(640);
+        // Castle center at (1248, 768), full viewport 1280x768 → scroll = (608, 384)
+        expect(initial.scrollX).toBe(608);
+        expect(initial.scrollY).toBe(384);
+        expect(initial.viewportWidth).toBe(1280);
+        expect(initial.viewportHeight).toBe(768);
 
         const after = await page.evaluate(() => window.gameAPI.scrollCamera(200, 100));
-        expect(after.scrollX).toBe(872);
-        expect(after.scrollY).toBe(548);
+        expect(after.scrollX).toBe(808);
+        expect(after.scrollY).toBe(484);
     });
 
     test('camera respects world bounds', async ({ page }) => {
@@ -23,9 +23,9 @@ test.describe('Scrollable Map', () => {
         await page.evaluate(() => window.gameAPI.scrollCamera(9999, 9999));
         const state = await page.evaluate(() => window.gameAPI.getCameraState());
 
-        // Camera bounds: max scrollX = 64 + 2432 - 1152 = 1344, max scrollY = 64 + 1408 - 640 = 832
-        expect(state.scrollX).toBeLessThanOrEqual(1344);
-        expect(state.scrollY).toBeLessThanOrEqual(832);
+        // Camera bounds: max scrollX = 2560 - 1280 = 1280, max scrollY = 1536 - 768 = 768
+        expect(state.scrollX).toBeLessThanOrEqual(1280);
+        expect(state.scrollY).toBeLessThanOrEqual(768);
     });
 
     test('keyboard arrow keys scroll the camera', async ({ page }) => {
