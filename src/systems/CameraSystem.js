@@ -1,7 +1,7 @@
 import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT, TILE_SIZE } from '../config/gameConfig.js';
 
 const SCROLL_SPEED = 300; // pixels per second
-const EDGE_THRESHOLD = 20; // pixels from edge to trigger scrolling
+const EDGE_THRESHOLD = 40; // pixels from edge to trigger scrolling
 
 export default class CameraSystem {
     constructor(scene) {
