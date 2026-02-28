@@ -61,15 +61,22 @@ export default class CameraSystem {
     }
 
     _bindArrow(zone, dx, dy) {
+        let active = false;
         zone.on('pointerdown', () => {
-            this.scrollDir.x += dx;
-            this.scrollDir.y += dy;
-            zone._arrowGraphics.setAlpha(1);
+            if (!active) {
+                active = true;
+                this.scrollDir.x += dx;
+                this.scrollDir.y += dy;
+                zone._arrowGraphics.setAlpha(1);
+            }
         });
         const stop = () => {
-            this.scrollDir.x -= dx;
-            this.scrollDir.y -= dy;
-            zone._arrowGraphics.setAlpha(ARROW_ALPHA);
+            if (active) {
+                active = false;
+                this.scrollDir.x -= dx;
+                this.scrollDir.y -= dy;
+                zone._arrowGraphics.setAlpha(ARROW_ALPHA);
+            }
         };
         zone.on('pointerup', stop);
         zone.on('pointerout', stop);
