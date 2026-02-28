@@ -7,9 +7,9 @@ export const GAME_HEIGHT = TILE_SIZE * GRID_ROWS;  // 1536
 export const VIEWPORT_WIDTH = 1280;
 export const VIEWPORT_HEIGHT = 768;
 
-// Zones
-export const PLAYER_ZONE_MAX_X = 13;   // columns 0-13 for player
-export const ENEMY_SPAWN_MIN_X = 38;   // columns 38-39 for enemy spawn
+// Castle starting position (center of map)
+export const CASTLE_GX = 17;
+export const CASTLE_GY = 10;
 
 // Starting resources
 export const STARTING_GOLD = 100;

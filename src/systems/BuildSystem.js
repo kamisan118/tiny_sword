@@ -1,4 +1,4 @@
-import { TILE_SIZE, GRID_COLS, GRID_ROWS, PLAYER_ZONE_MAX_X } from '../config/gameConfig.js';
+import { TILE_SIZE, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
 import Barracks from '../entities/Barracks.js';
 import GoldMine from '../entities/GoldMine.js';
 
@@ -63,9 +63,8 @@ export default class BuildSystem {
                 const px = gx * TILE_SIZE;
                 const py = gy * TILE_SIZE;
                 const free = gs.grid[gy][gx] === 0;
-                const inZone = gx <= PLAYER_ZONE_MAX_X;
 
-                if (free && inZone) {
+                if (free) {
                     this.gridOverlay.fillStyle(0x00ff00, 0.1);
                 } else {
                     this.gridOverlay.fillStyle(0xff0000, 0.15);
@@ -88,10 +87,6 @@ export default class BuildSystem {
             this.gridOverlay.lineBetween(x1, py, x2, py);
         }
 
-        // Draw player zone boundary (thicker line)
-        const zoneX = (PLAYER_ZONE_MAX_X + 1) * TILE_SIZE;
-        this.gridOverlay.lineStyle(2, 0xffaa00, 0.5);
-        this.gridOverlay.lineBetween(zoneX, y1, zoneX, y2);
     }
 
     hideGridOverlay() {
@@ -119,9 +114,6 @@ export default class BuildSystem {
     }
 
     canPlaceAt(gx, gy) {
-        // Must be in player zone
-        if (gx + this.gridW - 1 > PLAYER_ZONE_MAX_X) return false;
-
         // Must be within grass area (1 tile border)
         if (gx < 1 || gy < 1 || gx + this.gridW > GRID_COLS - 1 || gy + this.gridH > GRID_ROWS - 1) return false;
 

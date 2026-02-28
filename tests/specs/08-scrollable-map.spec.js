@@ -2,18 +2,19 @@ import { test, expect } from '@playwright/test';
 import { waitForGameReady } from '../helpers/gameHelper.js';
 
 test.describe('Scrollable Map', () => {
-    test('camera starts at top-left of grass area', async ({ page }) => {
+    test('camera starts centered on castle', async ({ page }) => {
         await waitForGameReady(page);
 
         const initial = await page.evaluate(() => window.gameAPI.getCameraState());
-        expect(initial.scrollX).toBe(64);
-        expect(initial.scrollY).toBe(64);
+        // Castle center at (1248, 768), viewport 1152x640 → scroll = (672, 448)
+        expect(initial.scrollX).toBe(672);
+        expect(initial.scrollY).toBe(448);
         expect(initial.viewportWidth).toBe(1152);
         expect(initial.viewportHeight).toBe(640);
 
         const after = await page.evaluate(() => window.gameAPI.scrollCamera(200, 100));
-        expect(after.scrollX).toBe(264);
-        expect(after.scrollY).toBe(164);
+        expect(after.scrollX).toBe(872);
+        expect(after.scrollY).toBe(548);
     });
 
     test('camera respects world bounds', async ({ page }) => {

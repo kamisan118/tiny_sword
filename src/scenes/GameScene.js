@@ -1,4 +1,4 @@
-import { TILE_SIZE, GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from '../config/gameConfig.js';
+import { TILE_SIZE, GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, CASTLE_GX, CASTLE_GY } from '../config/gameConfig.js';
 import GridSystem from '../systems/GridSystem.js';
 import Castle from '../entities/Castle.js';
 import SelectionSystem from '../systems/SelectionSystem.js';
@@ -57,6 +57,10 @@ export default class GameScene extends Phaser.Scene {
 
         this.placeStartingBuildings();
 
+        // Center camera on castle
+        const castleCenter = this.castle.getCenter();
+        this.cameras.main.centerOn(castleCenter.x, castleCenter.y);
+
         // Systems
         this.eventBus = new EventBus();
         this.resourceSystem = new ResourceSystem(this.eventBus);
@@ -79,8 +83,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     placeStartingBuildings() {
-        // Castle at grid (1, 4)
-        this.castle = new Castle(this, this.gridSystem, 1, 4);
+        // Castle at map center
+        this.castle = new Castle(this, this.gridSystem, CASTLE_GX, CASTLE_GY);
         this.buildings.push(this.castle);
     }
 

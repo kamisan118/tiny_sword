@@ -1,4 +1,4 @@
-import { TILE_SIZE, GRID_COLS, GRID_ROWS, PLAYER_ZONE_MAX_X, ENEMY_SPAWN_MIN_X } from '../config/gameConfig.js';
+import { TILE_SIZE, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
 
 export default class GridSystem {
     constructor() {
@@ -81,14 +81,6 @@ export default class GridSystem {
 
     inBounds(gx, gy) {
         return gx >= 0 && gx < GRID_COLS && gy >= 0 && gy < GRID_ROWS;
-    }
-
-    isPlayerZone(gx) {
-        return gx <= PLAYER_ZONE_MAX_X;
-    }
-
-    isEnemySpawnZone(gx) {
-        return gx >= ENEMY_SPAWN_MIN_X;
     }
 
     // Find the nearest free cell adjacent to a building, preferring the bottom-center (doorway)

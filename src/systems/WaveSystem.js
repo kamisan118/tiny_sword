@@ -1,4 +1,4 @@
-import { WAVE_INTERVAL, MAX_WAVES, GRID_ROWS, ENEMY_SPAWN_MIN_X } from '../config/gameConfig.js';
+import { WAVE_INTERVAL, MAX_WAVES, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
 import GoblinTorch from '../entities/GoblinTorch.js';
 import GoblinBarrel from '../entities/GoblinBarrel.js';
 import GoblinTNT from '../entities/GoblinTNT.js';
@@ -17,6 +17,21 @@ const WAVE_DEFS = [
     [{ type: 'torch', count: 12 }, { type: 'barrel', count: 6 }, { type: 'tnt', count: 4 }], // Wave 10
 ];
 
+const DIRECTIONS = ['top', 'bottom', 'left', 'right'];
+
+function getSpawnPosition(direction, index) {
+    switch (direction) {
+        case 'top':
+            return { gx: 2 + (index % (GRID_COLS - 4)), gy: 1 };
+        case 'bottom':
+            return { gx: 2 + (index % (GRID_COLS - 4)), gy: GRID_ROWS - 2 };
+        case 'left':
+            return { gx: 1, gy: 2 + (index % (GRID_ROWS - 4)) };
+        case 'right':
+            return { gx: GRID_COLS - 2, gy: 2 + (index % (GRID_ROWS - 4)) };
+    }
+}
+
 export default class WaveSystem {
     constructor(scene) {
         this.scene = scene;
@@ -26,6 +41,7 @@ export default class WaveSystem {
         this.timer = 0;
         this.allWavesSpawned = false;
         this.gameOver = false;
+        this.lastSpawnDirection = null;
     }
 
     update(time, delta) {
@@ -54,12 +70,13 @@ export default class WaveSystem {
 
         const waveDef = WAVE_DEFS[this.currentWave - 1] || WAVE_DEFS[WAVE_DEFS.length - 1];
 
+        // Pick a random direction for this wave
+        this.lastSpawnDirection = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+
         let spawnIndex = 0;
         for (const group of waveDef) {
             for (let i = 0; i < group.count; i++) {
-                // Spread spawns across right edge
-                const gx = ENEMY_SPAWN_MIN_X + (spawnIndex % 2);
-                const gy = 2 + (spawnIndex % (GRID_ROWS - 4));
+                const { gx, gy } = getSpawnPosition(this.lastSpawnDirection, spawnIndex);
 
                 const enemy = this.createEnemy(group.type, gx, gy);
                 if (enemy) {

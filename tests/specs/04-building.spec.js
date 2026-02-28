@@ -49,8 +49,8 @@ test.describe('Building System', () => {
         await waitForGameReady(page);
         await page.evaluate(() => window.gameAPI.setGold(500));
 
-        // Castle is at (1,4) — try to build overlapping
-        const result = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 1, 4));
+        // Castle is at (17,10) — try to build overlapping
+        const result = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 17, 10));
         expect(result.success).toBe(false);
         expect(result.reason).toBe('invalid_placement');
     });

@@ -22,7 +22,8 @@ export default class GameAPI {
             wave: {
                 current: s.waveSystem.currentWave,
                 max: s.waveSystem.maxWaves,
-                allSpawned: s.waveSystem.allWavesSpawned
+                allSpawned: s.waveSystem.allWavesSpawned,
+                lastSpawnDirection: s.waveSystem.lastSpawnDirection
             },
             playerUnits: s.playerUnits.filter(u => u.alive).map(u => this._serializeUnit(u)),
             enemyUnits: s.enemyUnits.filter(u => u.alive).map(u => this._serializeUnit(u)),
