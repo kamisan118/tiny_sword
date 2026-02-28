@@ -1,10 +1,16 @@
 import Warrior from '../entities/Warrior.js';
+import Archer from '../entities/Archer.js';
+import Monk from '../entities/Monk.js';
 import GoblinTorch from '../entities/GoblinTorch.js';
 import GoblinBarrel from '../entities/GoblinBarrel.js';
 import GoblinTNT from '../entities/GoblinTNT.js';
 import Barracks from '../entities/Barracks.js';
 import GoldMine from '../entities/GoldMine.js';
-import { WARRIOR_COST } from '../config/gameConfig.js';
+import Tower from '../entities/Tower.js';
+import Archery from '../entities/Archery.js';
+import House from '../entities/House.js';
+import Monastery from '../entities/Monastery.js';
+import { WARRIOR_COST, ARCHER_COST, MONK_COST } from '../config/gameConfig.js';
 
 export default class GameAPI {
     constructor(scene) {
@@ -112,6 +118,10 @@ export default class GameAPI {
         const configs = {
             barracks: { w: 3, h: 3, cls: Barracks },
             goldmine: { w: 3, h: 2, cls: GoldMine },
+            tower: { w: 2, h: 3, cls: Tower },
+            archery: { w: 3, h: 3, cls: Archery },
+            house: { w: 2, h: 2, cls: House },
+            monastery: { w: 3, h: 3, cls: Monastery },
         };
         const cfg = configs[type];
         if (!cfg) return { success: false, reason: 'unknown_type' };
@@ -130,23 +140,40 @@ export default class GameAPI {
         const building = this.scene.buildings.find(b => b.id === buildingId && b.alive);
         if (!building) return { success: false, reason: 'building_not_found' };
 
-        if (building.type === 'barracks' && unitType === 'warrior') {
-            if (!this.scene.resourceSystem.spendGold(WARRIOR_COST)) {
-                return { success: false, reason: 'insufficient_gold' };
-            }
-            const started = building.produceUnit(() => {
-                const cell = this.scene.gridSystem.findAdjacentFreeCell(
-                    building.gx, building.gy, building.gridW, building.gridH
-                );
-                if (cell) {
-                    const warrior = new Warrior(this.scene, this.scene.gridSystem, cell.gx, cell.gy);
-                    this.scene.playerUnits.push(warrior);
-                }
-            });
-            if (!started) return { success: false, reason: 'already_producing' };
-            return { success: true };
+        const productionConfigs = {
+            barracks: { warrior: { cost: WARRIOR_COST, cls: Warrior } },
+            archery: { archer: { cost: ARCHER_COST, cls: Archer } },
+            monastery: { monk: { cost: MONK_COST, cls: Monk } },
+        };
+
+        const buildingConfig = productionConfigs[building.type];
+        if (!buildingConfig) return { success: false, reason: 'building_cannot_produce' };
+
+        const unitConfig = buildingConfig[unitType];
+        if (!unitConfig) return { success: false, reason: 'unsupported' };
+
+        if (!this.scene.resourceSystem.spendGold(unitConfig.cost)) {
+            return { success: false, reason: 'insufficient_gold' };
         }
-        return { success: false, reason: 'unsupported' };
+        if (!this.scene.resourceSystem.usePopulation(1)) {
+            this.scene.resourceSystem.addGold(unitConfig.cost); // refund
+            return { success: false, reason: 'population_cap' };
+        }
+        const started = building.produceUnit(() => {
+            const cell = this.scene.gridSystem.findAdjacentFreeCell(
+                building.gx, building.gy, building.gridW, building.gridH
+            );
+            if (cell) {
+                const unit = new unitConfig.cls(this.scene, this.scene.gridSystem, cell.gx, cell.gy);
+                this.scene.playerUnits.push(unit);
+            }
+        });
+        if (!started) {
+            this.scene.resourceSystem.addGold(unitConfig.cost); // refund
+            this.scene.resourceSystem.freePopulation(1); // refund pop
+            return { success: false, reason: 'already_producing' };
+        }
+        return { success: true };
     }
 
     // --- Test Helpers ---
