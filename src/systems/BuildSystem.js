@@ -1,6 +1,10 @@
 import { TILE_SIZE, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
 import Barracks from '../entities/Barracks.js';
 import GoldMine from '../entities/GoldMine.js';
+import Tower from '../entities/Tower.js';
+import Archery from '../entities/Archery.js';
+import House from '../entities/House.js';
+import Monastery from '../entities/Monastery.js';
 
 export default class BuildSystem {
     constructor(scene) {
@@ -35,8 +39,12 @@ export default class BuildSystem {
         this.active = true;
         this.buildingType = type;
 
-        const config = { barracks: { w: 3, h: 3, tex: 'barracks' },
-                         goldmine: { w: 3, h: 2, tex: 'goldmine_active' } };
+        const config = { barracks:   { w: 3, h: 3, tex: 'barracks' },
+                         goldmine:   { w: 3, h: 2, tex: 'goldmine_active' },
+                         tower:      { w: 2, h: 3, tex: 'tower' },
+                         archery:    { w: 3, h: 3, tex: 'archery' },
+                         house:      { w: 2, h: 2, tex: 'house' },
+                         monastery:  { w: 3, h: 3, tex: 'monastery' } };
         const c = config[type];
         if (c) {
             this.gridW = c.w;
@@ -138,6 +146,14 @@ export default class BuildSystem {
             building = new Barracks(this.scene, this.scene.gridSystem, gx, gy);
         } else if (this.buildingType === 'goldmine') {
             building = new GoldMine(this.scene, this.scene.gridSystem, gx, gy);
+        } else if (this.buildingType === 'tower') {
+            building = new Tower(this.scene, this.scene.gridSystem, gx, gy);
+        } else if (this.buildingType === 'archery') {
+            building = new Archery(this.scene, this.scene.gridSystem, gx, gy);
+        } else if (this.buildingType === 'house') {
+            building = new House(this.scene, this.scene.gridSystem, gx, gy);
+        } else if (this.buildingType === 'monastery') {
+            building = new Monastery(this.scene, this.scene.gridSystem, gx, gy);
         }
 
         if (building) {
@@ -150,6 +166,10 @@ export default class BuildSystem {
     getCost() {
         if (this.buildingType === 'barracks') return Barracks.cost;
         if (this.buildingType === 'goldmine') return GoldMine.cost;
+        if (this.buildingType === 'tower') return Tower.cost;
+        if (this.buildingType === 'archery') return Archery.cost;
+        if (this.buildingType === 'house') return House.cost;
+        if (this.buildingType === 'monastery') return Monastery.cost;
         return 0;
     }
 
