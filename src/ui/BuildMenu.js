@@ -1,4 +1,4 @@
-import { TILE_SIZE, BARRACKS_COST, GOLDMINE_COST, GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
+import { TILE_SIZE, GOLDMINE_COST, BARRACKS_COST, TOWER_COST, ARCHERY_COST, HOUSE_COST, MONASTERY_COST, GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
 
 export default class BuildMenu {
     constructor(scene, castle) {
@@ -8,6 +8,10 @@ export default class BuildMenu {
         this.panelElements = [];
         this.canAffordMine = true;
         this.canAffordBarracks = true;
+        this.canAffordTower = true;
+        this.canAffordArchery = true;
+        this.canAffordHouse = true;
+        this.canAffordMonastery = true;
 
         // Build button at the top of the castle
         const center = castle.getCenter();
@@ -47,7 +51,6 @@ export default class BuildMenu {
 
         const scene = this.scene;
         const panelX = this.btnX;
-        const panelY = this.btnY;
 
         const style = { fontSize: '13px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };
@@ -57,53 +60,51 @@ export default class BuildMenu {
             .setDepth(949).setInteractive();
         this.backdrop.on('pointerdown', () => this.closePanel());
 
-        // Panel background — vertical layout, 2 items stacked
-        const pw = 170, rowH = 45, rows = 2;
+        // Panel background — vertical layout, 6 items stacked
+        const pw = 170, rowH = 45, rows = 6;
         const ph = rowH * rows + 20;
+        const panelY = this.btnY + ph / 2 + 10;
+
         this.panelBg = scene.add.rectangle(panelX, panelY, pw, ph, 0x3a2a14, 0.85)
             .setDepth(950).setStrokeStyle(2, 0xfef3c0);
 
-        // Row positions (centered vertically in the panel)
-        const row1Y = panelY - rowH / 2;
-        const row2Y = panelY + rowH / 2;
+        // Item definitions
+        const items = [
+            { name: 'Gold Mine', icon: 'goldmine_active', iconScale: 0.16, cost: GOLDMINE_COST, type: 'goldmine', canAfford: () => this.canAffordMine },
+            { name: 'House', icon: 'house', iconScale: 0.16, cost: HOUSE_COST, type: 'house', canAfford: () => this.canAffordHouse },
+            { name: 'Barracks', icon: 'barracks', iconScale: 0.19, cost: BARRACKS_COST, type: 'barracks', canAfford: () => this.canAffordBarracks },
+            { name: 'Archery', icon: 'archery', iconScale: 0.19, cost: ARCHERY_COST, type: 'archery', canAfford: () => this.canAffordArchery },
+            { name: 'Tower', icon: 'tower', iconScale: 0.16, cost: TOWER_COST, type: 'tower', canAfford: () => this.canAffordTower },
+            { name: 'Monastery', icon: 'monastery', iconScale: 0.16, cost: MONASTERY_COST, type: 'monastery', canAfford: () => this.canAffordMonastery },
+        ];
 
-        // --- Row 1: Gold Mine ---
-        const mineIcon = scene.add.image(panelX - 55, row1Y, 'goldmine_active')
-            .setScale(0.16).setDepth(952);
-        const mineBtn = scene.add.image(panelX + 15, row1Y, 'ui_btn_blue')
-            .setScale(0.75, 0.65).setDepth(951).setInteractive();
-        const mineLabel = scene.add.text(panelX + 15, row1Y - 8, 'Gold Mine', style)
-            .setOrigin(0.5).setDepth(952);
-        const mineCost = scene.add.text(panelX + 15, row1Y + 8, `${GOLDMINE_COST}g`, { ...style, color: '#ffdd44' })
-            .setOrigin(0.5).setDepth(952);
+        const startY = panelY - ((items.length - 1) * rowH) / 2;
+        const createdElements = [];
 
-        this._setupItemButton(mineBtn, 'goldmine', () => this.canAffordMine);
-        if (!this.canAffordMine) {
-            mineBtn.setTexture('ui_btn_disable');
-            mineIcon.setAlpha(0.5);
-            mineCost.setColor('#aa6666');
-        }
+        items.forEach((item, i) => {
+            const rowY = startY + i * rowH;
 
-        // --- Row 2: Barracks ---
-        const brrIcon = scene.add.image(panelX - 55, row2Y, 'barracks')
-            .setScale(0.19).setDepth(952);
-        const brrBtn = scene.add.image(panelX + 15, row2Y, 'ui_btn_blue')
-            .setScale(0.75, 0.65).setDepth(951).setInteractive();
-        const brrLabel = scene.add.text(panelX + 15, row2Y - 8, 'Barracks', style)
-            .setOrigin(0.5).setDepth(952);
-        const brrCost = scene.add.text(panelX + 15, row2Y + 8, `${BARRACKS_COST}g`, { ...style, color: '#ffdd44' })
-            .setOrigin(0.5).setDepth(952);
+            const icon = scene.add.image(panelX - 55, rowY, item.icon)
+                .setScale(item.iconScale).setDepth(952);
+            const btn = scene.add.image(panelX + 15, rowY, 'ui_btn_blue')
+                .setScale(0.75, 0.65).setDepth(951).setInteractive();
+            const label = scene.add.text(panelX + 15, rowY - 8, item.name, style)
+                .setOrigin(0.5).setDepth(952);
+            const cost = scene.add.text(panelX + 15, rowY + 8, `${item.cost}g`, { ...style, color: '#ffdd44' })
+                .setOrigin(0.5).setDepth(952);
 
-        this._setupItemButton(brrBtn, 'barracks', () => this.canAffordBarracks);
-        if (!this.canAffordBarracks) {
-            brrBtn.setTexture('ui_btn_disable');
-            brrIcon.setAlpha(0.5);
-            brrCost.setColor('#aa6666');
-        }
+            this._setupItemButton(btn, item.type, item.canAfford);
 
-        this.panelElements = [this.backdrop, this.panelBg,
-            mineIcon, mineBtn, mineLabel, mineCost,
-            brrIcon, brrBtn, brrLabel, brrCost];
+            if (!item.canAfford()) {
+                btn.setTexture('ui_btn_disable');
+                icon.setAlpha(0.5);
+                cost.setColor('#aa6666');
+            }
+
+            createdElements.push(icon, btn, label, cost);
+        });
+
+        this.panelElements = [this.backdrop, this.panelBg, ...createdElements];
     }
 
     closePanel() {
@@ -133,5 +134,9 @@ export default class BuildMenu {
     updateAffordState(gold) {
         this.canAffordMine = gold >= GOLDMINE_COST;
         this.canAffordBarracks = gold >= BARRACKS_COST;
+        this.canAffordTower = gold >= TOWER_COST;
+        this.canAffordArchery = gold >= ARCHERY_COST;
+        this.canAffordHouse = gold >= HOUSE_COST;
+        this.canAffordMonastery = gold >= MONASTERY_COST;
     }
 }
