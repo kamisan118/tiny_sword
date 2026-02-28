@@ -9,13 +9,17 @@ export default class BuildMenu {
         this.canAffordMine = true;
         this.canAffordBarracks = true;
 
-        // Build button centered on the castle
+        // Build button at the top of the castle
         const center = castle.getCenter();
         this.btnX = center.x;
-        this.btnY = center.y;
+        this.btnY = center.y - (castle.gridH * TILE_SIZE) / 2 + 16;
 
         const style = { fontSize: '14px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };
+
+        // Hammer icon to the left of the button
+        this.hammerIcon = scene.add.image(this.btnX - 60, this.btnY, 'ui_icon_hammer')
+            .setScale(0.4).setDepth(901);
 
         this.buildBtn = scene.add.image(this.btnX, this.btnY, 'ui_btn_blue')
             .setScale(0.9, 0.8).setDepth(900).setInteractive();

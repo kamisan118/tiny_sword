@@ -24,6 +24,11 @@ export default class Barracks extends Building {
         const style = { fontSize: '12px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };
 
+        // Knight avatar icon to the left of the button
+        this.avatarIcon = this.scene.add.image(center.x - 55, btnY, 'ui_avatar_knight')
+            .setScale(0.25).setDepth(2001);
+        this.uiElements.push(this.avatarIcon);
+
         // Button
         this.btnImage = this.scene.add.image(center.x, btnY, 'ui_btn_blue').setScale(0.7, 0.6)
             .setDepth(2000).setInteractive();
