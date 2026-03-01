@@ -20,13 +20,13 @@ export default class GoblinTorch extends Unit {
         this.playAnim('idle');
     }
 
-    // Torch_Red.png: 7 cols × 5 rows (192×192 frames)
-    // Row 0: idle (0-6), Row 1: run (7-13), Row 2: attack (14-20), Row 3: attack2 (21-27), Row 4: death (28-34)
+    // Torch_Red.png: 7 cols × 5 rows (192×192 frames), col 6 is empty in every row
+    // Row 0: idle (0-5), Row 1: run (7-12), Row 2: attack (14-19), Row 3: attack2 (21-26), Row 4: death (28-33)
     initAnims() {
-        createAnim(this.scene, 'goblin_torch_idle', 'goblin_torch', 0, 6, 8);
-        createAnim(this.scene, 'goblin_torch_run', 'goblin_torch', 7, 13, 10);
-        createAnim(this.scene, 'goblin_torch_attack', 'goblin_torch', 14, 20, 10, 0);
-        createAnim(this.scene, 'goblin_torch_death', 'goblin_torch', 28, 34, 8, 0);
+        createAnim(this.scene, 'goblin_torch_idle', 'goblin_torch', 0, 5, 8);
+        createAnim(this.scene, 'goblin_torch_run', 'goblin_torch', 7, 12, 10);
+        createAnim(this.scene, 'goblin_torch_attack', 'goblin_torch', 14, 19, 10, 0);
+        createAnim(this.scene, 'goblin_torch_death', 'goblin_torch', 28, 33, 8, 0);
     }
 
     playAnim(name) {

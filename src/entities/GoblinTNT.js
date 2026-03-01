@@ -20,11 +20,11 @@ export default class GoblinTNT extends Unit {
         this.playAnim('idle');
     }
 
-    // TNT_Red.png: 7 cols × 3 rows (192×192 frames)
-    // Row 0: idle (0-6), Row 1: run (7-13), Row 2: explode (14-20)
+    // TNT_Red.png: 7 cols × 3 rows (192×192 frames), col 6 is empty in rows 0-1
+    // Row 0: idle (0-5), Row 1: run (7-12), Row 2: explode (14-20)
     initAnims() {
-        createAnim(this.scene, 'goblin_tnt_idle', 'goblin_tnt', 0, 6, 8);
-        createAnim(this.scene, 'goblin_tnt_run', 'goblin_tnt', 7, 13, 10);
+        createAnim(this.scene, 'goblin_tnt_idle', 'goblin_tnt', 0, 5, 8);
+        createAnim(this.scene, 'goblin_tnt_run', 'goblin_tnt', 7, 12, 10);
         createAnim(this.scene, 'goblin_tnt_explode', 'goblin_tnt', 14, 20, 10, 0);
     }
 
