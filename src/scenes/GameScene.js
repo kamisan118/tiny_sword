@@ -52,7 +52,7 @@ export default class GameScene extends Phaser.Scene {
         this.selectionSystem = new SelectionSystem(this);
         this.hud = new HUD(this, this.eventBus);
         this.buildSystem = new BuildSystem(this);
-        this.buildMenu = new BuildMenu(this, this.castle);
+        this.buildMenu = new BuildMenu(this);
         this.combatSystem = new CombatSystem(this);
         this.waveSystem = new WaveSystem(this);
         this.cameraSystem = new CameraSystem(this);
