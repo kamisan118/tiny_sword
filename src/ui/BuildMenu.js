@@ -12,14 +12,14 @@ export default class BuildMenu {
         this.canAffordHouse = true;
         this.canAffordMonastery = true;
 
-        // Hammer button on the right edge of the screen
-        const btnX = VIEWPORT_WIDTH - 38;
-        const btnY = VIEWPORT_HEIGHT / 2;
+        // Hammer button in the top HUD bar (between population and wave)
+        const btnX = 480;
+        const btnY = 30;
 
         this.hammerBtnBg = scene.add.image(btnX, btnY, 'ui_btn_sq_blue')
-            .setDisplaySize(56, 56).setDepth(900).setScrollFactor(0).setInteractive();
+            .setDisplaySize(50, 50).setDepth(1000).setScrollFactor(0).setInteractive();
         this.hammerIcon = scene.add.image(btnX, btnY, 'ui_icon_hammer')
-            .setScale(0.4).setDepth(901).setScrollFactor(0);
+            .setScale(0.42).setDepth(1001).setScrollFactor(0);
 
         this.hammerBtnBg.on('pointerover', () => {
             this.hammerBtnBg.setTexture('ui_btn_sq_hover');
@@ -73,8 +73,8 @@ export default class BuildMenu {
         const pw = 170;
         const rowH = 50;
         const ph = rowH * items.length + 20;
-        const panelX = VIEWPORT_WIDTH - pw / 2 - 10;
-        const panelY = VIEWPORT_HEIGHT / 2;
+        const panelX = 480;
+        const panelY = 55 + ph / 2;
 
         this.panelBg = scene.add.rectangle(panelX, panelY, pw, ph, 0x3a2a14, 0.9)
             .setScrollFactor(0).setDepth(950).setStrokeStyle(2, 0xfef3c0);
