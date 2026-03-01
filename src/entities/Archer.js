@@ -88,6 +88,7 @@ export default class Archer extends Unit {
     performAttack(time) {
         if (time - this.lastAttackTime < this.attackCooldown) return;
         this.lastAttackTime = time;
+        this.playAnim('attack');
 
         if (this.attackTarget && this.attackTarget.alive) {
             this.fireArrow(this.attackTarget);

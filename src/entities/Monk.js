@@ -97,6 +97,7 @@ export default class Monk extends Unit {
     performHeal(time) {
         if (time - this.lastAttackTime < this.attackCooldown) return;
         this.lastAttackTime = time;
+        this.playAnim('heal');
 
         if (this.healTarget && this.healTarget.alive) {
             this.healTarget.hp = Math.min(this.healTarget.maxHp, this.healTarget.hp + MONK_HEAL_AMOUNT);
