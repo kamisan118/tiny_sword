@@ -85,6 +85,7 @@ export default class Warrior extends Unit {
     performAttack(time) {
         if (time - this.lastAttackTime < this.attackCooldown) return;
         this.lastAttackTime = time;
+        this.playAnim('attack');
 
         if (this.attackTarget && this.attackTarget.alive) {
             this.attackTarget.takeDamage(this.attackDamage);
