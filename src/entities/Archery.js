@@ -4,7 +4,7 @@ import { ARCHERY_HP, ARCHERY_COST, ARCHER_COST, ARCHER_PRODUCE_TIME, TILE_SIZE }
 
 export default class Archery extends Building {
     constructor(scene, gridSystem, gx, gy) {
-        super(scene, gridSystem, gx, gy, 3, 2, 'archery', ARCHERY_HP, -32);
+        super(scene, gridSystem, gx, gy, 3, 3, 'archery', ARCHERY_HP);
         this.type = 'archery';
         this.faction = 'player';
         this.producing = false;
@@ -19,7 +19,7 @@ export default class Archery extends Building {
 
     createUI() {
         const center = this.getCenter();
-        const btnY = center.y - this.sprite.displayHeight / 2 + 16;
+        const btnY = center.y - (this.gridH * TILE_SIZE) / 2 + 16;
 
         const style = { fontSize: '12px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };

@@ -5,7 +5,7 @@ const BLINK_INTERVAL = 500;
 
 export default class GoldMine extends Building {
     constructor(scene, gridSystem, gx, gy) {
-        super(scene, gridSystem, gx, gy, 3, 1, 'goldmine_active', GOLDMINE_HP, -32);
+        super(scene, gridSystem, gx, gy, 3, 2, 'goldmine_active', GOLDMINE_HP);
         this.type = 'goldmine';
         this.faction = 'player';
         this.incomeTimer = 0;
@@ -38,7 +38,7 @@ export default class GoldMine extends Building {
     showIncomeText() {
         const center = this.getCenter();
         const x = center.x;
-        const y = center.y - this.sprite.displayHeight / 2 - 10;
+        const y = center.y - (this.gridH * TILE_SIZE) / 2 - 10;
 
         const text = this.scene.add.text(x, y, `+${GOLDMINE_INCOME}g`, {
             fontSize: '16px',

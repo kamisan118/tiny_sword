@@ -6,7 +6,7 @@ import {
 
 export default class Tower extends Building {
     constructor(scene, gridSystem, gx, gy) {
-        super(scene, gridSystem, gx, gy, 2, 2, 'tower', TOWER_HP, -32);
+        super(scene, gridSystem, gx, gy, 2, 3, 'tower', TOWER_HP);
         this.type = 'tower';
         this.faction = 'player';
         this.lastAttackTime = 0;
