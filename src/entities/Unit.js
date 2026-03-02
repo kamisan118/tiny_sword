@@ -210,22 +210,30 @@ export default class Unit {
         // Check if new position enters an occupied grid cell
         const newGrid = this.gridSystem.pixelToGrid(newX, newY);
         if (!this.gridSystem.isWalkable(newGrid.gx, newGrid.gy)) {
-            if (this.path.length === 0) {
-                // Hit a building during direct move — pathfind around it
-                this.vx = 0;
-                this.vy = 0;
-                this._detourAroundObstacle();
-                return;
+            // Wall sliding: try each axis independently
+            const xGrid = this.gridSystem.pixelToGrid(newX, this.sprite.y);
+            const yGrid = this.gridSystem.pixelToGrid(this.sprite.x, newY);
+            const canX = this.gridSystem.isWalkable(xGrid.gx, xGrid.gy);
+            const canY = this.gridSystem.isWalkable(yGrid.gx, yGrid.gy);
+
+            if (canX || canY) {
+                if (canX) { this.sprite.x = newX; } else { this.vx = 0; }
+                if (canY) { this.sprite.y = newY; } else { this.vy = 0; }
             } else {
+                // Fully blocked on both axes
                 this.vx = 0;
                 this.vy = 0;
-                this.stopMoving();
+                if (this.path.length === 0) {
+                    this._detourAroundObstacle();
+                } else {
+                    this.stopMoving();
+                }
                 return;
             }
+        } else {
+            this.sprite.x = newX;
+            this.sprite.y = newY;
         }
-
-        this.sprite.x = newX;
-        this.sprite.y = newY;
 
         // Flip sprite based on velocity direction
         if (this.vx < -1) this.sprite.setFlipX(true);
