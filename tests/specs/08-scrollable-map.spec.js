@@ -6,15 +6,15 @@ test.describe('Scrollable Map', () => {
         await waitForGameReady(page);
 
         const initial = await page.evaluate(() => window.gameAPI.getCameraState());
-        // Castle center at (1248, 768), full viewport 1280x768 → scroll = (608, 384)
+        // Castle visual center at (1248, 704), full viewport 1280x768 → scroll = (608, 320)
         expect(initial.scrollX).toBe(608);
-        expect(initial.scrollY).toBe(384);
+        expect(initial.scrollY).toBe(320);
         expect(initial.viewportWidth).toBe(1280);
         expect(initial.viewportHeight).toBe(768);
 
         const after = await page.evaluate(() => window.gameAPI.scrollCamera(200, 100));
         expect(after.scrollX).toBe(808);
-        expect(after.scrollY).toBe(484);
+        expect(after.scrollY).toBe(420);
     });
 
     test('camera respects world bounds', async ({ page }) => {

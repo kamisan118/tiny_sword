@@ -4,7 +4,7 @@ import { BARRACKS_HP, BARRACKS_COST, WARRIOR_COST, WARRIOR_PRODUCE_TIME, TILE_SI
 
 export default class Barracks extends Building {
     constructor(scene, gridSystem, gx, gy) {
-        super(scene, gridSystem, gx, gy, 3, 3, 'barracks', BARRACKS_HP);
+        super(scene, gridSystem, gx, gy, 3, 2, 'barracks', BARRACKS_HP, -32);
         this.type = 'barracks';
         this.faction = 'player';
         this.producing = false;
@@ -19,7 +19,7 @@ export default class Barracks extends Building {
 
     createUI() {
         const center = this.getCenter();
-        const btnY = center.y - (this.gridH * TILE_SIZE) / 2 + 16;
+        const btnY = center.y - this.sprite.displayHeight / 2 + 16;
 
         const style = { fontSize: '12px', color: '#fef3c0', fontFamily: 'Arial',
                         stroke: '#3a2a14', strokeThickness: 3 };

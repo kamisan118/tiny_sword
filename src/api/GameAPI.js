@@ -113,12 +113,12 @@ export default class GameAPI {
     buildStructure(type, gx, gy) {
         const bs = this.scene.buildSystem;
         const configs = {
-            barracks: { w: 3, h: 3, cls: Barracks },
-            goldmine: { w: 3, h: 2, cls: GoldMine },
-            tower: { w: 2, h: 3, cls: Tower },
-            archery: { w: 3, h: 3, cls: Archery },
+            barracks: { w: 3, h: 2, cls: Barracks },
+            goldmine: { w: 3, h: 1, cls: GoldMine },
+            tower: { w: 2, h: 2, cls: Tower },
+            archery: { w: 3, h: 2, cls: Archery },
             house: { w: 2, h: 2, cls: House },
-            monastery: { w: 3, h: 3, cls: Monastery },
+            monastery: { w: 3, h: 2, cls: Monastery },
         };
         const cfg = configs[type];
         if (!cfg) return { success: false, reason: 'unknown_type' };

@@ -46,11 +46,12 @@ export default class SelectionSystem {
         if (!clickedUnit) {
             for (const building of this.scene.buildings) {
                 if (!building.alive) continue;
-                const center = building.getCenter();
-                const hw = (building.gridW * 64) / 2;
-                const hh = (building.gridH * 64) / 2;
-                if (clickX >= center.x - hw && clickX <= center.x + hw &&
-                    clickY >= center.y - hh && clickY <= center.y + hh) {
+                const sx = building.sprite.x;
+                const sy = building.sprite.y;
+                const hw = building.sprite.displayWidth / 2;
+                const hh = building.sprite.displayHeight / 2;
+                if (clickX >= sx - hw && clickX <= sx + hw &&
+                    clickY >= sy - hh && clickY <= sy + hh) {
                     clickedBuilding = building;
                     break;
                 }

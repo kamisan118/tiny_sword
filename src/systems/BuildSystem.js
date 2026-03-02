@@ -39,16 +39,17 @@ export default class BuildSystem {
         this.active = true;
         this.buildingType = type;
 
-        const config = { barracks:   { w: 3, h: 3, tex: 'barracks' },
-                         goldmine:   { w: 3, h: 2, tex: 'goldmine_active' },
-                         tower:      { w: 2, h: 3, tex: 'tower' },
-                         archery:    { w: 3, h: 3, tex: 'archery' },
-                         house:      { w: 2, h: 2, tex: 'house' },
-                         monastery:  { w: 3, h: 3, tex: 'monastery' } };
+        const config = { barracks:   { w: 3, h: 2, tex: 'barracks', offsetY: -32 },
+                         goldmine:   { w: 3, h: 1, tex: 'goldmine_active', offsetY: -32 },
+                         tower:      { w: 2, h: 2, tex: 'tower', offsetY: -32 },
+                         archery:    { w: 3, h: 2, tex: 'archery', offsetY: -32 },
+                         house:      { w: 2, h: 2, tex: 'house', offsetY: 0 },
+                         monastery:  { w: 3, h: 2, tex: 'monastery', offsetY: -32 } };
         const c = config[type];
         if (c) {
             this.gridW = c.w;
             this.gridH = c.h;
+            this.spriteOffsetY = c.offsetY || 0;
             this.ghostSprite = this.scene.add.image(0, 0, c.tex);
             this.ghostSprite.setAlpha(0.6);
             this.ghostSprite.setDepth(2000);
@@ -111,9 +112,9 @@ export default class BuildSystem {
         const gx = grid.gx;
         const gy = grid.gy;
 
-        // Snap to grid
+        // Snap to grid (with visual offset)
         const px = gx * TILE_SIZE + (this.gridW * TILE_SIZE) / 2;
-        const py = gy * TILE_SIZE + (this.gridH * TILE_SIZE) / 2;
+        const py = gy * TILE_SIZE + (this.gridH * TILE_SIZE) / 2 + this.spriteOffsetY;
         this.ghostSprite.setPosition(px, py);
 
         // Check if placement is valid
