@@ -409,7 +409,7 @@ export default class Unit {
             targetY = target.sprite ? target.sprite.y : target.getCenter().y;
             dist = target.sprite ? this.distanceTo(target) : this.distanceToPoint(targetX, targetY);
         }
-        const range = this.attackRange * TILE_SIZE;
+        const range = isBuilding ? 10 : this.attackRange * TILE_SIZE;
 
         if (dist <= range) {
             // In range — switch to attacking
@@ -429,7 +429,21 @@ export default class Unit {
             return 'attacking';
         }
 
-        // Buildings: skip LOS seek (building cells are non-walkable, LOS always fails)
+        // Buildings at close range: direct move to edge (pathfinding can't do sub-cell precision)
+        if (isBuilding && dist < TILE_SIZE) {
+            this.targetX = targetX;
+            this.targetY = targetY;
+            this.finalTargetX = targetX;
+            this.finalTargetY = targetY;
+            this.path = [];
+            if (this.state !== UnitState.MOVING) {
+                this.state = UnitState.MOVING;
+                this.playAnim('run');
+            }
+            return 'chasing';
+        }
+
+        // Non-buildings: LOS seek (building cells are non-walkable, LOS always fails)
         if (!isBuilding) {
             // Close range (< 5 tiles) with line-of-sight: use direct Seek
             const seekThreshold = 5 * TILE_SIZE;
