@@ -431,31 +431,47 @@ if (dist < 2) {
 
 > 原始碼：`src/entities/Unit.js` — `updateMovement()`, `_detourAroundObstacle()`
 
-### 5.1 即時碰撞檢測
+### 5.1 即時碰撞檢測（Wall Sliding）
 
-每幀更新位置後，檢查新位置是否進入不可行走的格子：
+每幀更新位置後，檢查新位置是否進入不可行走的格子。
+如果撞牆，**拆開 X/Y 軸分別判定**——撞牆的軸歸零，另一軸繼續移動，讓單位沿牆面滑過角落：
 
 ```js
-// src/entities/Unit.js:210-225
+// src/entities/Unit.js:210-236
 const newGrid = this.gridSystem.pixelToGrid(newX, newY);
 if (!this.gridSystem.isWalkable(newGrid.gx, newGrid.gy)) {
-    if (this.path.length === 0) {
-        // 直線移動撞到障礙 → 重新尋路繞過
-        this.vx = 0;
-        this.vy = 0;
-        this._detourAroundObstacle();
+    // Wall sliding: 拆開 X/Y 軸
+    const xGrid = this.gridSystem.pixelToGrid(newX, this.sprite.y);
+    const yGrid = this.gridSystem.pixelToGrid(this.sprite.x, newY);
+    const canX = this.gridSystem.isWalkable(xGrid.gx, xGrid.gy);
+    const canY = this.gridSystem.isWalkable(yGrid.gx, yGrid.gy);
+
+    if (canX || canY) {
+        if (canX) { this.sprite.x = newX; } else { this.vx = 0; }
+        if (canY) { this.sprite.y = newY; } else { this.vy = 0; }
     } else {
-        // 沿路徑移動撞到障礙 → 停下
+        // 兩軸都被擋住
         this.vx = 0;
         this.vy = 0;
-        this.stopMoving();
+        if (this.path.length === 0) {
+            this._detourAroundObstacle();
+        } else {
+            this.stopMoving();
+        }
+        return;
     }
+} else {
+    this.sprite.x = newX;
+    this.sprite.y = newY;
 }
 ```
 
-兩種情況的處理不同：
-- **直線移動**（`path.length === 0`）：觸發 `_detourAroundObstacle()` 自動繞路
-- **沿路徑移動**（有 path）：直接停止（路徑本身不該穿過障礙）
+```
+修改前：切角衝進建築格 → 完全停止 → 等 300ms 重算 → 反覆卡頓
+修改後：切角 → Y 軸撞牆歸零，X 軸繼續 → 沿牆面滑過角落
+```
+
+只有兩軸都被擋住時才觸發 `_detourAroundObstacle()`（直線移動）或 `stopMoving()`（路徑移動）。
 
 ### 5.2 繞路策略：路徑截斷
 
@@ -521,27 +537,36 @@ if (this.attackTarget && this.attackTarget.alive) {
 
 提供目標，取得狀態（`'attacking'` / `'chasing'` / `'idle'`），根據狀態決定動畫和攻擊。
 
-### 6.2 三層決策
+### 6.2 四層決策
 
-`chaseTarget()` 根據距離採用不同策略：
+`chaseTarget()` 根據目標類型和距離採用不同策略：
 
 ```
                         ┌─────────────────────────────────────────┐
                         │            目標                          │
                         └─────────────────────────────────────────┘
-                              ▲              ▲              ▲
-                              │              │              │
-距離 ≤ attackRange     ──► 攻擊          │              │
-                                          │              │
-距離 < 5 tiles + 有 LOS  ────────► Seek 直追      │
-                                                      │
-距離 ≥ 5 tiles 或無 LOS  ───────────────────► Pathfinding
+                         ▲          ▲              ▲              ▲
+                         │          │              │              │
+距離 ≤ range       ──► 攻擊     │              │              │
+                                 │              │              │
+建築 + < 1 tile    ─────► 貼邊直走       │              │
+                                              │              │
+單位 + < 5 tiles + LOS ──────► Seek 直追      │
+                                                           │
+其他               ────────────────────────► Pathfinding
+```
+
+攻擊範圍因目標類型不同：建築 = 10px（幾乎貼到邊緣），單位 = `attackRange * TILE_SIZE`：
+
+```js
+// src/entities/Unit.js:412
+const range = isBuilding ? 10 : this.attackRange * TILE_SIZE;
 ```
 
 **層 1：攻擊範圍內 → 停下攻擊**
 
 ```js
-// src/entities/Unit.js:406-422
+// src/entities/Unit.js:414-430
 if (dist <= range) {
     if (this.state !== UnitState.ATTACKING) {
         this.state = UnitState.ATTACKING;
@@ -553,12 +578,33 @@ if (dist <= range) {
 }
 ```
 
-**層 2：近距離 + 有視線 → 直接 Seek（僅限非建築目標）**
+**層 2：建築近距離 → 直接貼邊移動**
+
+Pathfinding 只能定位到格子中心（距邊緣 32px），無法滿足建築 10px 的攻擊範圍。
+當距離 < 1 格時，改用 direct movement 走向邊緣像素點，繞過格子精度限制：
+
+```js
+// src/entities/Unit.js:432-444
+if (isBuilding && dist < TILE_SIZE) {
+    this.targetX = targetX;
+    this.targetY = targetY;
+    this.finalTargetX = targetX;
+    this.finalTargetY = targetY;
+    this.path = [];
+    if (this.state !== UnitState.MOVING) {
+        this.state = UnitState.MOVING;
+        this.playAnim('run');
+    }
+    return 'chasing';
+}
+```
+
+**層 3：單位近距離 + 有視線 → 直接 Seek**
 
 不用尋路，直接把目標像素座標設為移動目標。每幀更新目標位置，實現平滑追蹤：
 
 ```js
-// src/entities/Unit.js:425-444
+// src/entities/Unit.js:446-467
 if (!isBuilding) {
     const seekThreshold = 5 * TILE_SIZE;
     if (dist < seekThreshold && target.sprite) {
@@ -580,10 +626,10 @@ if (!isBuilding) {
 }
 ```
 
-**層 3：遠距離或無視線 → Pathfinding + 節流**
+**層 4：遠距離或無視線 → Pathfinding + 節流**
 
 ```js
-// src/entities/Unit.js:447-452
+// src/entities/Unit.js:469-474
 if (this.state !== UnitState.MOVING && this.canRepath(time)) {
     this.lastRepathTime = time;
     this.moveToWithPathfinding(targetX, targetY);
@@ -593,15 +639,15 @@ return 'chasing';
 
 ### 6.3 建築目標的特殊處理
 
-建築是多格物體（兵營 3×3、城堡 5×4），需要特殊處理兩個問題：
+建築是多格物體（兵營 3×3、城堡 5×3），需要特殊處理四個問題：
 
 **問題 1：距離計算**
 
-如果用到建築中心的距離，單位站在建築旁邊（距中心 96px）卻超出攻擊範圍（76.8px）。
+如果用到建築中心的距離，單位站在建築旁邊（距中心 96px）卻超出攻擊範圍。
 改為計算到建築**矩形邊緣最近點**的距離：
 
 ```js
-// src/entities/Unit.js:390-398
+// src/entities/Unit.js:390-406
 if (isBuilding) {
     const bx = target.gx * TILE_SIZE;
     const by = target.gy * TILE_SIZE;
@@ -622,15 +668,20 @@ if (isBuilding) {
                  └───────────┘
 ```
 
-**問題 2：移動目標**
+**問題 2：攻擊範圍**
 
-`targetX/targetY` 同時作為移動目標，讓 `moveToWithPathfinding` 導向建築邊緣而非中心。
-這確保 `findNearestWalkable` 從邊緣格子開始搜尋，找到正確方向的鄰接格。
+建築使用固定 10px 的攻擊範圍（而非單位的 `attackRange * TILE_SIZE`），
+讓敵人必須幾乎貼到建築格子邊緣才能攻擊，避免在隔壁格子就開始攻擊。
 
-**問題 3：跳過 LOS Seek**
+**問題 3：貼邊移動（最後一格的精度問題）**
+
+Pathfinding 只能定位到格子中心（距邊緣 32px），但建築攻擊範圍只有 10px。
+中間 22px 的差距用 direct movement 補上——當距離 < 1 格時直接走向邊緣像素點（見層 2）。
+
+**問題 4：跳過 LOS Seek**
 
 建築格子不可行走，`hasLineOfSight` 到建築中心一定失敗。
-因此建築目標直接跳過 Seek 層，使用 Pathfinding。
+因此建築目標跳過 Seek 層，改用層 2 的貼邊直走（近距離）或層 4 的 Pathfinding（遠距離）。
 
 ### 6.4 重算節流
 
@@ -670,7 +721,9 @@ const isBuilding = BUILDING_TYPES.includes(target.type);
 | `turnRate` | `Unit.js:48` | `8` | 轉向速率，越大方向改變越快 |
 | `slowRadius` | `Unit.js:49` | `32` | 最終目標減速距離（px） |
 | `repathInterval` | `Unit.js:42` | `300` | 重算路徑最小間隔（ms） |
-| `attackRange` | 各單位 constructor | 1.2-5 | 攻擊範圍（格數，乘 TILE_SIZE 換算像素） |
-| Seek 閾值 | `Unit.js:427` | `5 * TILE_SIZE` | 低於此距離且有 LOS 用 Seek 直追 |
+| `attackRange`（單位） | 各單位 constructor | 1.2-5 | 攻擊範圍（格數，乘 TILE_SIZE 換算像素） |
+| `attackRange`（建築） | `Unit.js:412` | `10` | 建築攻擊範圍（固定 px），幾乎貼到邊緣 |
+| 建築貼邊閾值 | `Unit.js:432` | `TILE_SIZE` (64) | 距建築邊緣低於此距離改用 direct movement |
+| Seek 閾值 | `Unit.js:446` | `5 * TILE_SIZE` | 低於此距離且有 LOS 用 Seek 直追（僅限單位目標） |
 | 路徑點到達距離 | `Unit.js:172` | `2` | 低於此像素距離視為到達路徑點 |
 | 對角線成本 | `Pathfinding.js:6-12` | `1.41` | ≈√2，正交為 1 |
