@@ -1,6 +1,6 @@
 import { GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
 
-// 8-directional A* pathfinding
+// 8-directional Theta* pathfinding (any-angle A* variant)
 const DIRS = [
     { dx: 0, dy: -1, cost: 1 },    // N
     { dx: 1, dy: -1, cost: 1.41 },  // NE
@@ -13,10 +13,16 @@ const DIRS = [
 ];
 
 function heuristic(ax, ay, bx, by) {
-    // Octile distance
-    const dx = Math.abs(ax - bx);
-    const dy = Math.abs(ay - by);
-    return Math.max(dx, dy) + 0.41 * Math.min(dx, dy);
+    // Euclidean distance (better for Theta* any-angle paths)
+    const dx = ax - bx;
+    const dy = ay - by;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function euclideanDist(ax, ay, bx, by) {
+    const dx = ax - bx;
+    const dy = ay - by;
+    return Math.sqrt(dx * dx + dy * dy);
 }
 
 class MinHeap {
@@ -98,11 +104,13 @@ export function findPath(gridSystem, sx, sy, ex, ey) {
     const key = (x, y) => y * GRID_COLS + x;
     const open = new MinHeap();
     const gScore = new Map();
-    const cameFrom = new Map();
+    const cameFrom = new Map();   // key -> parent key
+    const parentPos = new Map();  // key -> {x, y} for Theta* parent lookups
     const closed = new Set();
 
     const startKey = key(sx, sy);
     gScore.set(startKey, 0);
+    parentPos.set(startKey, { x: sx, y: sy });
     open.push({ x: sx, y: sy, f: heuristic(sx, sy, ex, ey) });
 
     while (open.size > 0) {
@@ -117,6 +125,10 @@ export function findPath(gridSystem, sx, sy, ex, ey) {
         closed.add(ck);
 
         const currentG = gScore.get(ck);
+
+        // Get parent of current for Theta* line-of-sight check
+        const parentKey = cameFrom.get(ck);
+        const parent = parentKey !== undefined ? parentPos.get(parentKey) : null;
 
         for (const dir of DIRS) {
             const nx = current.x + dir.dx;
@@ -136,12 +148,25 @@ export function findPath(gridSystem, sx, sy, ex, ey) {
                 }
             }
 
-            const tentativeG = currentG + dir.cost;
+            let tentativeG, fromKey;
+
+            // Theta*: try path through parent if line-of-sight exists
+            if (parent && gridSystem.hasLineOfSight(parent.x, parent.y, nx, ny)) {
+                const parentG = gScore.get(parentKey);
+                tentativeG = parentG + euclideanDist(parent.x, parent.y, nx, ny);
+                fromKey = parentKey;
+            } else {
+                // Standard A*: path through current
+                tentativeG = currentG + dir.cost;
+                fromKey = ck;
+            }
+
             const prevG = gScore.get(nk);
 
             if (prevG === undefined || tentativeG < prevG) {
                 gScore.set(nk, tentativeG);
-                cameFrom.set(nk, ck);
+                cameFrom.set(nk, fromKey);
+                parentPos.set(nk, { x: nx, y: ny });
                 open.push({ x: nx, y: ny, f: tentativeG + heuristic(nx, ny, ex, ey) });
             }
         }
@@ -164,6 +189,34 @@ function reconstructPath(cameFrom, ex, ey, sx, sy) {
     }
 
     return path;
+}
+
+/**
+ * Smooth a path by removing unnecessary intermediate waypoints using line-of-sight checks.
+ * @param {GridSystem} gridSystem
+ * @param {Array<{gx,gy}>} path
+ * @returns {Array<{gx,gy}>} smoothed path
+ */
+export function smoothPath(gridSystem, path) {
+    if (!path || path.length <= 2) return path;
+
+    const result = [path[0]];
+    let current = 0;
+
+    while (current < path.length - 1) {
+        // Find the farthest visible point from current
+        let farthest = current + 1;
+        for (let i = path.length - 1; i > current + 1; i--) {
+            if (gridSystem.hasLineOfSight(path[current].gx, path[current].gy, path[i].gx, path[i].gy)) {
+                farthest = i;
+                break;
+            }
+        }
+        result.push(path[farthest]);
+        current = farthest;
+    }
+
+    return result;
 }
 
 function findNearestWalkable(gridSystem, gx, gy) {

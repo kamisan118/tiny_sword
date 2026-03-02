@@ -68,18 +68,10 @@ export default class GoblinTorch extends Unit {
 
         // Pursue current target
         if (this.attackTarget && this.attackTarget.alive) {
-            const dist = this.distanceTo(this.attackTarget);
-            const range = this.attackRange * TILE_SIZE;
-
-            if (dist <= range) {
-                if (this.state !== UnitState.ATTACKING) {
-                    this.state = UnitState.ATTACKING;
-                    this.playAnim('attack');
-                    this.path = [];
-                }
+            const result = this.chaseTarget(time, this.attackTarget);
+            if (result === 'attacking') {
+                this.playAnim('attack');
                 this.performAttack(time);
-            } else if (this.state !== UnitState.MOVING) {
-                this.moveTo(this.attackTarget.sprite.x, this.attackTarget.sprite.y);
             }
             return;
         }
@@ -100,8 +92,7 @@ export default class GoblinTorch extends Unit {
 
         if (targetBuilding) {
             this.attackTarget = targetBuilding;
-            const center = targetBuilding.getCenter();
-            this.moveTo(center.x, center.y);
+            this.chaseTarget(time, targetBuilding);
         }
     }
 

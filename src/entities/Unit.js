@@ -1,5 +1,5 @@
 import { TILE_SIZE } from '../config/gameConfig.js';
-import { findPath } from '../utils/Pathfinding.js';
+import { findPath, smoothPath } from '../utils/Pathfinding.js';
 import HealthBar from '../ui/HealthBar.js';
 
 let nextUnitId = 1;
@@ -37,6 +37,16 @@ export default class Unit {
         this.attackCooldown = config.attackCooldown || 1000;
         this.lastAttackTime = 0;
         this.attackTarget = null;
+
+        // Re-path throttle
+        this.repathInterval = 300; // ms
+        this.lastRepathTime = 0;
+
+        // Velocity-based movement
+        this.vx = 0;
+        this.vy = 0;
+        this.turnRate = 8; // radians per second — how fast the unit can change direction
+        this.slowRadius = 32; // pixels — start decelerating within this distance to waypoint
 
         // Create sprite at grid position
         const pos = gridSystem.gridToPixel(gx, gy);
@@ -107,7 +117,7 @@ export default class Unit {
         const path = findPath(this.gridSystem, start.gx, start.gy, end.gx, end.gy);
 
         if (path && path.length > 0) {
-            this.moveAlongPath(path);
+            this.moveAlongPath(smoothPath(this.gridSystem, path));
         } else if (path && path.length === 0) {
             // Already at destination
             this.stopMoving();
@@ -154,6 +164,7 @@ export default class Unit {
     }
 
     updateMovement(delta) {
+        const dt = delta / 1000;
         const dx = this.targetX - this.sprite.x;
         const dy = this.targetY - this.sprite.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -161,6 +172,8 @@ export default class Unit {
         if (dist < 2) {
             this.sprite.x = this.targetX;
             this.sprite.y = this.targetY;
+            this.vx = 0;
+            this.vy = 0;
 
             // If following a path, move to next point
             if (this.path.length > 0) {
@@ -172,24 +185,40 @@ export default class Unit {
             return;
         }
 
-        const step = (this.speed * delta) / 1000;
+        // Desired velocity: direction to target × speed
         const nx = dx / dist;
         const ny = dy / dist;
-        const newX = this.sprite.x + nx * step;
-        const newY = this.sprite.y + ny * step;
+
+        // Arrive behavior: decelerate near final destination (not intermediate waypoints)
+        const isFinalTarget = this.path.length === 0 || this.pathIndex >= this.path.length - 1;
+        let desiredSpeed = this.speed;
+        if (isFinalTarget && dist < this.slowRadius) {
+            desiredSpeed = this.speed * (dist / this.slowRadius);
+        }
+
+        const desiredVx = nx * desiredSpeed;
+        const desiredVy = ny * desiredSpeed;
+
+        // Smooth steering: lerp current velocity toward desired velocity
+        const lerpFactor = Math.min(1, this.turnRate * dt);
+        this.vx += (desiredVx - this.vx) * lerpFactor;
+        this.vy += (desiredVy - this.vy) * lerpFactor;
+
+        const newX = this.sprite.x + this.vx * dt;
+        const newY = this.sprite.y + this.vy * dt;
 
         // Check if new position enters an occupied grid cell
         const newGrid = this.gridSystem.pixelToGrid(newX, newY);
         if (!this.gridSystem.isWalkable(newGrid.gx, newGrid.gy)) {
-            // Allow movement if the occupied cell belongs to the attack target
-            const cellId = this.gridSystem.grid[newGrid.gy]?.[newGrid.gx];
-            if (this.attackTarget && cellId === this.attackTarget.id) {
-                // OK — approaching attack target building
-            } else if (this.path.length === 0) {
+            if (this.path.length === 0) {
                 // Hit a building during direct move — pathfind around it
+                this.vx = 0;
+                this.vy = 0;
                 this._detourAroundObstacle();
                 return;
             } else {
+                this.vx = 0;
+                this.vy = 0;
                 this.stopMoving();
                 return;
             }
@@ -198,9 +227,9 @@ export default class Unit {
         this.sprite.x = newX;
         this.sprite.y = newY;
 
-        // Flip sprite based on movement direction
-        if (dx < -1) this.sprite.setFlipX(true);
-        else if (dx > 1) this.sprite.setFlipX(false);
+        // Flip sprite based on velocity direction
+        if (this.vx < -1) this.sprite.setFlipX(true);
+        else if (this.vx > 1) this.sprite.setFlipX(false);
 
         // Dust trail particles
         this._dustTimer = (this._dustTimer || 0) + delta;
@@ -255,6 +284,8 @@ export default class Unit {
         this.pathIndex = 0;
         this.finalTargetX = undefined;
         this.finalTargetY = undefined;
+        this.vx = 0;
+        this.vy = 0;
         this.playAnim('idle');
     }
 
@@ -338,6 +369,87 @@ export default class Unit {
 
     playAnim(_name) {
         // Override in subclass
+    }
+
+    canRepath(time) {
+        return time - this.lastRepathTime >= this.repathInterval;
+    }
+
+    /**
+     * Unified chase logic: pursue a target, attack when in range, repath with throttle.
+     * Uses direct Seek for close/moving targets, pathfinding for distant targets.
+     * @returns {'attacking'|'chasing'|'idle'} current chase state
+     */
+    chaseTarget(time, target) {
+        if (!target || !target.alive) return 'idle';
+
+        const BUILDING_TYPES = ['building', 'castle', 'barracks', 'house', 'tower', 'monastery', 'goldmine', 'archery'];
+        const isBuilding = BUILDING_TYPES.includes(target.type);
+        let targetX, targetY, dist;
+
+        if (isBuilding) {
+            // For buildings: target nearest edge point and measure distance to edge
+            const bx = target.gx * TILE_SIZE;
+            const by = target.gy * TILE_SIZE;
+            const bw = target.gridW * TILE_SIZE;
+            const bh = target.gridH * TILE_SIZE;
+            targetX = Math.max(bx, Math.min(this.sprite.x, bx + bw));
+            targetY = Math.max(by, Math.min(this.sprite.y, by + bh));
+            dist = this.distanceToPoint(targetX, targetY);
+        } else {
+            targetX = target.sprite ? target.sprite.x : target.getCenter().x;
+            targetY = target.sprite ? target.sprite.y : target.getCenter().y;
+            dist = target.sprite ? this.distanceTo(target) : this.distanceToPoint(targetX, targetY);
+        }
+        const range = this.attackRange * TILE_SIZE;
+
+        if (dist <= range) {
+            // In range — switch to attacking
+            if (this.state !== UnitState.ATTACKING) {
+                this.state = UnitState.ATTACKING;
+                this.path = [];
+                this.vx = 0;
+                this.vy = 0;
+            }
+            // Face toward building center or target
+            const faceX = isBuilding ? target.getCenter().x : targetX;
+            if (faceX < this.sprite.x) {
+                this.sprite.setFlipX(true);
+            } else if (faceX > this.sprite.x) {
+                this.sprite.setFlipX(false);
+            }
+            return 'attacking';
+        }
+
+        // Buildings: skip LOS seek (building cells are non-walkable, LOS always fails)
+        if (!isBuilding) {
+            // Close range (< 5 tiles) with line-of-sight: use direct Seek
+            const seekThreshold = 5 * TILE_SIZE;
+            if (dist < seekThreshold && target.sprite) {
+                const start = this.getGridPos();
+                const end = this.gridSystem.pixelToGrid(targetX, targetY);
+                if (this.gridSystem.hasLineOfSight(start.gx, start.gy, end.gx, end.gy)) {
+                    // Direct seek: continuously update target position for smooth pursuit
+                    this.targetX = targetX;
+                    this.targetY = targetY;
+                    this.finalTargetX = targetX;
+                    this.finalTargetY = targetY;
+                    this.path = [];
+                    if (this.state !== UnitState.MOVING) {
+                        this.state = UnitState.MOVING;
+                        this.playAnim('run');
+                    }
+                    return 'chasing';
+                }
+            }
+        }
+
+        // Far range or no line-of-sight: use pathfinding with throttle
+        if (this.state !== UnitState.MOVING && this.canRepath(time)) {
+            this.lastRepathTime = time;
+            this.moveToWithPathfinding(targetX, targetY);
+        }
+        return 'chasing';
     }
 
     getGridPos() {

@@ -53,32 +53,10 @@ export default class Monk extends Unit {
                 this.healTarget = null;
                 this.stopMoving();
             } else {
-                // Target alive and still injured
-                const dist = this.distanceTo(this.healTarget);
-                const range = this.attackRange * TILE_SIZE;
-
-                if (dist <= range) {
-                    // In range -- heal
-                    if (this.state !== UnitState.ATTACKING) {
-                        this.state = UnitState.ATTACKING;
-                        this.playAnim('heal');
-                        this.path = [];
-                    }
+                const result = this.chaseTarget(time, this.healTarget);
+                if (result === 'attacking') {
+                    this.playAnim('heal');
                     this.performHeal(time);
-
-                    // Face target
-                    if (this.healTarget && this.healTarget.sprite) {
-                        if (this.healTarget.sprite.x < this.sprite.x) {
-                            this.sprite.setFlipX(true);
-                        } else {
-                            this.sprite.setFlipX(false);
-                        }
-                    }
-                } else {
-                    // Move toward target
-                    if (this.state !== UnitState.MOVING) {
-                        this.moveTo(this.healTarget.sprite.x, this.healTarget.sprite.y);
-                    }
                 }
             }
         } else if (this.state === UnitState.ATTACKING) {

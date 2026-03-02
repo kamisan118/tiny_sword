@@ -6,7 +6,7 @@ export default class CommandSystem {
     issueMove(units, px, py) {
         for (const unit of units) {
             if (!unit.alive) continue;
-            unit.moveTo(px, py);
+            unit.moveToWithPathfinding(px, py);
         }
         this.showMoveMarker(px, py);
     }
@@ -31,7 +31,7 @@ export default class CommandSystem {
             // Move toward target — combat system will handle attack when in range
             const tx = target.sprite.x;
             const ty = target.sprite.y;
-            unit.moveTo(tx, ty);
+            unit.moveToWithPathfinding(tx, ty);
         }
     }
 }

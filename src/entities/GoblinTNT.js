@@ -46,22 +46,13 @@ export default class GoblinTNT extends Unit {
         super.update(time, delta);
     }
 
-    updateAI(_time, _delta) {
+    updateAI(time, _delta) {
         if (this.hasExploded) return;
 
         if (this.attackTarget && this.attackTarget.alive) {
-            const dist = this.distanceTo(this.attackTarget);
-            const range = this.attackRange * TILE_SIZE;
-
-            if (dist <= range) {
+            const result = this.chaseTarget(time, this.attackTarget);
+            if (result === 'attacking') {
                 this.explode();
-            } else if (this.state !== UnitState.MOVING) {
-                if (this.attackTarget.sprite) {
-                    this.moveTo(this.attackTarget.sprite.x, this.attackTarget.sprite.y);
-                } else {
-                    const center = this.attackTarget.getCenter();
-                    this.moveTo(center.x, center.y);
-                }
             }
             return;
         }
@@ -79,8 +70,7 @@ export default class GoblinTNT extends Unit {
         }
         if (targetBuilding) {
             this.attackTarget = targetBuilding;
-            const center = targetBuilding.getCenter();
-            this.moveTo(center.x, center.y);
+            this.chaseTarget(time, targetBuilding);
         }
     }
 

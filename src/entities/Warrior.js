@@ -42,31 +42,10 @@ export default class Warrior extends Unit {
 
         // If attacking a target, pursue it
         if (this.attackTarget && this.attackTarget.alive && this.attackTarget.sprite) {
-            const dist = this.distanceTo(this.attackTarget);
-            const range = this.attackRange * TILE_SIZE;
-
-            if (dist <= range) {
-                // In range — attack
-                if (this.state !== UnitState.ATTACKING) {
-                    this.state = UnitState.ATTACKING;
-                    this.playAnim('attack');
-                    this.path = [];
-                }
+            const result = this.chaseTarget(time, this.attackTarget);
+            if (result === 'attacking') {
+                this.playAnim('attack');
                 this.performAttack(time);
-
-                // Face target
-                if (this.attackTarget && this.attackTarget.sprite) {
-                    if (this.attackTarget.sprite.x < this.sprite.x) {
-                        this.sprite.setFlipX(true);
-                    } else {
-                        this.sprite.setFlipX(false);
-                    }
-                }
-            } else {
-                // Chase target
-                if (this.state !== UnitState.MOVING) {
-                    this.moveTo(this.attackTarget.sprite.x, this.attackTarget.sprite.y);
-                }
             }
         } else if (this.attackTarget || this.state === UnitState.ATTACKING) {
             // Target dead or gone
