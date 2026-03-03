@@ -95,4 +95,7 @@ export const images = [
     { key: 'ui_cursor_select',    path: `${UI}/UI Elements/Cursors/Cursor_04.png` },
     { key: 'ui_special_paper',  path: `${UI}/UI Elements/Papers/SpecialPaper.png` },
     { key: 'ui_regular_paper', path: `${UI}/UI Elements/Papers/RegularPaper.png` },
+
+    // --- Landing ---
+    { key: 'landing_bg',          path: 'assets/landing_background.gif' },
 ];
