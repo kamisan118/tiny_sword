@@ -1,3 +1,5 @@
+import { t } from '../i18n/i18n.js';
+
 export default class HUD {
     constructor(scene, eventBus) {
         this.scene = scene;
@@ -27,13 +29,13 @@ export default class HUD {
         // --- Center: Wave display ---
         scene.add.image(640, 28, 'ui_ribbon_yellow').setScale(1.3, 0.85)
             .setScrollFactor(0).setDepth(999);
-        this.waveText = scene.add.text(640, 24, 'Wave 0', { ...style, fontSize: '18px' })
+        this.waveText = scene.add.text(640, 24, t('waveCount', { wave: 0 }), { ...style, fontSize: '18px' })
             .setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(1000);
 
         // --- Right: Timer display ---
         scene.add.image(1172 - pad, 30, 'ui_carved').setScale(1.15, 0.8)
             .setScrollFactor(0).setDepth(999);
-        this.timerText = scene.add.text(1245 - pad, 21, 'Next wave: 60s', style)
+        this.timerText = scene.add.text(1245 - pad, 21, t('nextWave', { sec: 60 }), style)
             .setOrigin(1, 0).setScrollFactor(0).setDepth(1000);
 
         // Listen for gold changes
@@ -48,25 +50,25 @@ export default class HUD {
 
         // Listen for wave changes
         eventBus.on('waveChanged', (wave) => {
-            this.waveText.setText(`Wave ${wave}`);
+            this.waveText.setText(t('waveCount', { wave }));
         });
     }
 
     updateTimer(seconds) {
         if (seconds <= 0) {
-            this.timerText.setText('Wave incoming!');
+            this.timerText.setText(t('waveIncoming'));
             this.timerText.setColor('#ff6644');
         } else {
-            this.timerText.setText(`Next wave: ${Math.ceil(seconds)}s`);
+            this.timerText.setText(t('nextWave', { sec: Math.ceil(seconds) }));
             this.timerText.setColor('#fef3c0');
         }
     }
 
     showVictory() {
-        this.timerText.setText('VICTORY!');
+        this.timerText.setText(t('victoryHud'));
     }
 
     showDefeat() {
-        this.timerText.setText('DEFEATED');
+        this.timerText.setText(t('defeatHud'));
     }
 }
