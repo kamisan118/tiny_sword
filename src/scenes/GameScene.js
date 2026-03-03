@@ -12,6 +12,7 @@ import CombatSystem from '../systems/CombatSystem.js';
 import WaveSystem from '../systems/WaveSystem.js';
 import CameraSystem from '../systems/CameraSystem.js';
 import GameAPI from '../api/GameAPI.js';
+import { t } from '../i18n/i18n.js';
 
 // Tilemap_Flat frame indices (10 cols × 4 rows)
 // Green grass: top-left corner at (0,0), center fill at (1,1)
@@ -173,14 +174,14 @@ export default class GameScene extends Phaser.Scene {
         // Result text
         const titleStyle = { fontSize: '52px', color: result === 'victory' ? '#ffdd44' : '#ff4444',
                              fontFamily: 'Arial', stroke: '#000000', strokeThickness: 6 };
-        const title = result === 'victory' ? 'VICTORY' : 'DEFEAT';
+        const title = result === 'victory' ? t('victory') : t('defeat');
         this.add.text(cx, cy - 50, title, titleStyle)
             .setOrigin(0.5).setScrollFactor(0).setDepth(5002);
 
         // Play Again button using game UI assets
         const btnImg = this.add.image(cx, cy + 20, 'ui_btn_blue')
             .setScale(1.2, 0.9).setScrollFactor(0).setDepth(5002).setInteractive();
-        this.add.text(cx, cy + 18, 'Play Again', {
+        this.add.text(cx, cy + 18, t('playAgain'), {
             fontSize: '22px', color: '#fef3c0', fontFamily: 'Arial',
             stroke: '#3a2a14', strokeThickness: 3
         }).setOrigin(0.5).setScrollFactor(0).setDepth(5003);
@@ -196,7 +197,7 @@ export default class GameScene extends Phaser.Scene {
         const menuBtnY = cy + 80;
         const menuBtnImg = this.add.image(cx, menuBtnY, 'ui_btn_blue')
             .setScale(1.2, 0.9).setScrollFactor(0).setDepth(5002).setInteractive();
-        this.add.text(cx, menuBtnY - 2, 'Main Menu', {
+        this.add.text(cx, menuBtnY - 2, t('mainMenu'), {
             fontSize: '22px', color: '#fef3c0', fontFamily: 'Arial',
             stroke: '#3a2a14', strokeThickness: 3
         }).setOrigin(0.5).setScrollFactor(0).setDepth(5003);
