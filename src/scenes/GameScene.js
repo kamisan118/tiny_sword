@@ -168,7 +168,7 @@ export default class GameScene extends Phaser.Scene {
         overlay.setScrollFactor(0).setDepth(5000);
 
         // 9-slice RegularPaper panel
-        this._createRegularPaperPanel(cx, cy, 400, 250);
+        this._createRegularPaperPanel(cx, cy, 400, 310);
 
         // Result text
         const titleStyle = { fontSize: '52px', color: result === 'victory' ? '#ffdd44' : '#ff4444',
@@ -178,9 +178,9 @@ export default class GameScene extends Phaser.Scene {
             .setOrigin(0.5).setScrollFactor(0).setDepth(5002);
 
         // Play Again button using game UI assets
-        const btnImg = this.add.image(cx, cy + 40, 'ui_btn_blue')
+        const btnImg = this.add.image(cx, cy + 20, 'ui_btn_blue')
             .setScale(1.2, 0.9).setScrollFactor(0).setDepth(5002).setInteractive();
-        this.add.text(cx, cy + 38, 'Play Again', {
+        this.add.text(cx, cy + 18, 'Play Again', {
             fontSize: '22px', color: '#fef3c0', fontFamily: 'Arial',
             stroke: '#3a2a14', strokeThickness: 3
         }).setOrigin(0.5).setScrollFactor(0).setDepth(5003);
@@ -190,6 +190,22 @@ export default class GameScene extends Phaser.Scene {
         btnImg.on('pointerdown', () => {
             btnImg.setTexture('ui_btn_blue_pressed');
             this.scene.restart();
+        });
+
+        // Main Menu button
+        const menuBtnY = cy + 80;
+        const menuBtnImg = this.add.image(cx, menuBtnY, 'ui_btn_blue')
+            .setScale(1.2, 0.9).setScrollFactor(0).setDepth(5002).setInteractive();
+        this.add.text(cx, menuBtnY - 2, 'Main Menu', {
+            fontSize: '22px', color: '#fef3c0', fontFamily: 'Arial',
+            stroke: '#3a2a14', strokeThickness: 3
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(5003);
+
+        menuBtnImg.on('pointerover', () => menuBtnImg.setTexture('ui_btn_hover'));
+        menuBtnImg.on('pointerout', () => menuBtnImg.setTexture('ui_btn_blue'));
+        menuBtnImg.on('pointerdown', () => {
+            menuBtnImg.setTexture('ui_btn_blue_pressed');
+            this.scene.start('LandingScene');
         });
     }
 
