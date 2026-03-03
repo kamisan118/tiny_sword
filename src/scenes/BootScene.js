@@ -1,5 +1,6 @@
 import { spritesheets, images } from '../config/assetManifest.js';
 import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from '../config/gameConfig.js';
+import { t } from '../i18n/i18n.js';
 
 export default class BootScene extends Phaser.Scene {
     constructor() {
@@ -17,13 +18,13 @@ export default class BootScene extends Phaser.Scene {
         const fill = this.add.rectangle(cx - barW / 2, cy, 0, barH, 0x44aa44);
         fill.setOrigin(0, 0.5);
 
-        const label = this.add.text(cx, cy - 40, 'Loading...', {
+        const label = this.add.text(cx, cy - 40, t('loading'), {
             fontSize: '20px', color: '#ffffff'
         }).setOrigin(0.5);
 
         this.load.on('progress', (value) => {
             fill.width = barW * value;
-            label.setText(`Loading... ${Math.round(value * 100)}%`);
+            label.setText(t('loadingPct', { pct: Math.round(value * 100) }));
         });
 
         this.load.on('complete', () => {
