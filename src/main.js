@@ -1,5 +1,6 @@
 import { VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from './config/gameConfig.js';
 import BootScene from './scenes/BootScene.js';
+import LandingScene from './scenes/LandingScene.js';
 import GameScene from './scenes/GameScene.js';
 
 const config = {
@@ -8,7 +9,7 @@ const config = {
     height: VIEWPORT_HEIGHT,
     parent: 'game-container',
     backgroundColor: '#525B66',
-    scene: [BootScene, GameScene],
+    scene: [BootScene, LandingScene, GameScene],
     physics: {
         default: 'arcade',
         arcade: {
