@@ -1,4 +1,5 @@
 import { WARRIOR_COST, TILE_SIZE } from '../config/gameConfig.js';
+import { t } from '../i18n/i18n.js';
 
 export default class UnitPanel {
     constructor(scene) {
@@ -43,7 +44,7 @@ export default class UnitPanel {
         this.elements.push(this.btnImage);
 
         // Button label
-        const label = this.scene.add.text(panelX, panelY, `Train (${WARRIOR_COST}g)`, style)
+        const label = this.scene.add.text(panelX, panelY, t('train', { cost: WARRIOR_COST }), style)
             .setOrigin(0.5).setDepth(2001);
         this.elements.push(label);
 

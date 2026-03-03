@@ -4,6 +4,7 @@ import {
     MONK_HP, MONK_SPEED, MONK_HEAL_AMOUNT,
     MONK_HEAL_RANGE, MONK_HEAL_COOLDOWN, TILE_SIZE
 } from '../config/gameConfig.js';
+import { t } from '../i18n/i18n.js';
 
 export default class Monk extends Unit {
     constructor(scene, gridSystem, gx, gy) {
@@ -97,7 +98,7 @@ export default class Monk extends Unit {
         const y = target.sprite.y - 20;
 
         // Green plus sign particle
-        const healText = this.scene.add.text(x, y, '+' + MONK_HEAL_AMOUNT, {
+        const healText = this.scene.add.text(x, y, t('healAmount', { amount: MONK_HEAL_AMOUNT }), {
             fontSize: '14px',
             color: '#00ff00',
             fontStyle: 'bold'

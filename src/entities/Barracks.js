@@ -1,6 +1,7 @@
 import Building from './Building.js';
 import Warrior from './Warrior.js';
 import { BARRACKS_HP, BARRACKS_COST, WARRIOR_COST, WARRIOR_PRODUCE_TIME, TILE_SIZE } from '../config/gameConfig.js';
+import { t } from '../i18n/i18n.js';
 
 export default class Barracks extends Building {
     constructor(scene, gridSystem, gx, gy) {
@@ -35,7 +36,7 @@ export default class Barracks extends Building {
         this.uiElements.push(this.btnImage);
 
         // Label
-        this.btnLabel = this.scene.add.text(center.x, btnY, `Train (${WARRIOR_COST}g)`, style)
+        this.btnLabel = this.scene.add.text(center.x, btnY, t('train', { cost: WARRIOR_COST }), style)
             .setOrigin(0.5).setDepth(2001);
         this.uiElements.push(this.btnLabel);
 

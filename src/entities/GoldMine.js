@@ -1,5 +1,6 @@
 import Building from './Building.js';
 import { GOLDMINE_COST, GOLDMINE_HP, GOLDMINE_INCOME, GOLDMINE_INCOME_INTERVAL, TILE_SIZE } from '../config/gameConfig.js';
+import { t } from '../i18n/i18n.js';
 
 const BLINK_INTERVAL = 500;
 
@@ -40,7 +41,7 @@ export default class GoldMine extends Building {
         const x = center.x;
         const y = center.y - (this.gridH * TILE_SIZE) / 2 - 10;
 
-        const text = this.scene.add.text(x, y, `+${GOLDMINE_INCOME}g`, {
+        const text = this.scene.add.text(x, y, t('goldIncome', { amount: GOLDMINE_INCOME }), {
             fontSize: '16px',
             color: '#ffdd00',
             fontFamily: 'Arial',

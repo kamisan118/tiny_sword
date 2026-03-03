@@ -1,6 +1,7 @@
 import Building from './Building.js';
 import Monk from './Monk.js';
 import { MONASTERY_HP, MONASTERY_COST, MONK_COST, MONK_PRODUCE_TIME, TILE_SIZE } from '../config/gameConfig.js';
+import { t } from '../i18n/i18n.js';
 
 export default class Monastery extends Building {
     constructor(scene, gridSystem, gx, gy) {
@@ -35,7 +36,7 @@ export default class Monastery extends Building {
         this.uiElements.push(this.btnImage);
 
         // Label
-        this.btnLabel = this.scene.add.text(center.x, btnY, `Train (${MONK_COST}g)`, style)
+        this.btnLabel = this.scene.add.text(center.x, btnY, t('train', { cost: MONK_COST }), style)
             .setOrigin(0.5).setDepth(2001);
         this.uiElements.push(this.btnLabel);
 
