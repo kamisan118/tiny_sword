@@ -1,4 +1,5 @@
 import { GOLDMINE_COST, BARRACKS_COST, TOWER_COST, ARCHERY_COST, HOUSE_COST, MONASTERY_COST, VIEWPORT_WIDTH, VIEWPORT_HEIGHT } from '../config/gameConfig.js';
+import { t } from '../i18n/i18n.js';
 
 export default class BuildMenu {
     constructor(scene) {
@@ -62,12 +63,12 @@ export default class BuildMenu {
 
         // Panel on the right side — vertical strip
         const items = [
-            { name: 'Gold Mine', icon: 'goldmine_active', iconScale: 0.16, cost: GOLDMINE_COST, type: 'goldmine', canAfford: () => this.canAffordMine },
-            { name: 'House', icon: 'house', iconScale: 0.16, cost: HOUSE_COST, type: 'house', canAfford: () => this.canAffordHouse },
-            { name: 'Barracks', icon: 'barracks', iconScale: 0.19, cost: BARRACKS_COST, type: 'barracks', canAfford: () => this.canAffordBarracks },
-            { name: 'Archery', icon: 'archery', iconScale: 0.19, cost: ARCHERY_COST, type: 'archery', canAfford: () => this.canAffordArchery },
-            { name: 'Tower', icon: 'tower', iconScale: 0.16, cost: TOWER_COST, type: 'tower', canAfford: () => this.canAffordTower },
-            { name: 'Monastery', icon: 'monastery', iconScale: 0.16, cost: MONASTERY_COST, type: 'monastery', canAfford: () => this.canAffordMonastery },
+            { name: t('goldMine'), icon: 'goldmine_active', iconScale: 0.16, cost: GOLDMINE_COST, type: 'goldmine', canAfford: () => this.canAffordMine },
+            { name: t('house'), icon: 'house', iconScale: 0.16, cost: HOUSE_COST, type: 'house', canAfford: () => this.canAffordHouse },
+            { name: t('barracks'), icon: 'barracks', iconScale: 0.19, cost: BARRACKS_COST, type: 'barracks', canAfford: () => this.canAffordBarracks },
+            { name: t('archery'), icon: 'archery', iconScale: 0.19, cost: ARCHERY_COST, type: 'archery', canAfford: () => this.canAffordArchery },
+            { name: t('tower'), icon: 'tower', iconScale: 0.16, cost: TOWER_COST, type: 'tower', canAfford: () => this.canAffordTower },
+            { name: t('monastery'), icon: 'monastery', iconScale: 0.16, cost: MONASTERY_COST, type: 'monastery', canAfford: () => this.canAffordMonastery },
         ];
 
         const pw = 170;
