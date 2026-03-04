@@ -4,7 +4,7 @@
   "description": "Tiny Swords RTS - A StarCraft-like tower defense game",
   "type": "module",
   "scripts": {
-    "dev": "live-server --port=8081 --no-browser --ignore='**/.git/**'",
+    "dev": "live-server --port=8081 --no-browser --ignore='**/.git/**,test-results/**'",
     "lint": "eslint src/",
     "test": "npx playwright test"
   },
