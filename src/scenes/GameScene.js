@@ -34,6 +34,7 @@ export default class GameScene extends Phaser.Scene {
         this.enemyUnits = [];
 
         // Camera setup
+        this.cameras.main.setBackgroundColor('#525B66');
         this.cameras.main.setViewport(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
         this.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
         this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);

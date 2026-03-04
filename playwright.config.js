@@ -10,5 +10,8 @@ export default defineConfig({
         viewport: { width: 1280, height: 768 },
         headless: true,
         screenshot: 'only-on-failure',
+        launchOptions: {
+            args: ['--autoplay-policy=no-user-gesture-required'],
+        },
     },
 });

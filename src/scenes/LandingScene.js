@@ -10,15 +10,14 @@ export default class LandingScene extends Phaser.Scene {
         const cx = VIEWPORT_WIDTH / 2;
         const cy = VIEWPORT_HEIGHT / 2;
 
-        // Full-screen background
-        const bg = this.add.image(cx, cy, 'landing_bg');
-        bg.setDisplaySize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        // Animated video background (DOM element behind transparent canvas)
+        this._createVideoBg();
 
         // --- Language toggle button (top-left) ---
         const langBtn = this.add.image(40, 40, 'ui_btn_sq_blue')
             .setDisplaySize(50, 50).setInteractive();
         const langLabel = getLocale() === 'en' ? 'EN' : '中';
-        const langText = this.add.text(40, 40, langLabel, {
+        this.add.text(40, 40, langLabel, {
             fontSize: '18px', color: '#fef3c0', fontFamily: 'Arial',
             stroke: '#3a2a14', strokeThickness: 3
         }).setOrigin(0.5);
@@ -64,5 +63,49 @@ export default class LandingScene extends Phaser.Scene {
             quitBtn.setTexture('ui_btn_blue_pressed');
             window.close();
         });
+    }
+
+    _createVideoBg() {
+        const canvas = this.game.canvas;
+        const parent = canvas.parentElement;
+
+        const video = document.createElement('video');
+        video.src = 'assets/landing_background.mp4';
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.style.cssText = `
+            position: absolute;
+            top: ${canvas.style.marginTop || '0'};
+            left: ${canvas.style.marginLeft || '0'};
+            width: ${canvas.style.width || canvas.width + 'px'};
+            height: ${canvas.style.height || canvas.height + 'px'};
+            object-fit: cover;
+            object-position: top;
+            z-index: 0;
+        `;
+
+        // Canvas sits on top of video
+        canvas.style.position = 'relative';
+        canvas.style.zIndex = '1';
+
+        parent.style.position = 'relative';
+        parent.insertBefore(video, canvas);
+
+        this._videoBg = video;
+        video.play().catch(() => {}); // ignore autoplay failures in test env
+    }
+
+    _removeVideoBg() {
+        if (this._videoBg) {
+            this._videoBg.pause();
+            this._videoBg.remove();
+            this._videoBg = null;
+        }
+    }
+
+    shutdown() {
+        this._removeVideoBg();
     }
 }

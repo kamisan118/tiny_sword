@@ -8,6 +8,9 @@ export default class BootScene extends Phaser.Scene {
     }
 
     preload() {
+        // Opaque background (canvas is transparent globally for LandingScene video)
+        this.cameras.main.setBackgroundColor('#525B66');
+
         // Progress bar
         const cx = VIEWPORT_WIDTH / 2;
         const cy = VIEWPORT_HEIGHT / 2;
@@ -45,6 +48,7 @@ export default class BootScene extends Phaser.Scene {
         for (const img of images) {
             this.load.image(img.key, img.path);
         }
+
     }
 
     create() {

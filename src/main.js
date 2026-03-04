@@ -8,7 +8,7 @@ const config = {
     width: VIEWPORT_WIDTH,
     height: VIEWPORT_HEIGHT,
     parent: 'game-container',
-    backgroundColor: '#525B66',
+    transparent: true,
     scene: [BootScene, LandingScene, GameScene],
     physics: {
         default: 'arcade',
