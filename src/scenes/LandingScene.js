@@ -46,6 +46,7 @@ export default class LandingScene extends Phaser.Scene {
         startBtn.on('pointerdown', () => {
             startBtn.setTexture('ui_btn_blue_pressed');
             this.scene.start('GameScene');
+            this.scene.stop();
         });
 
         // --- Quit button ---

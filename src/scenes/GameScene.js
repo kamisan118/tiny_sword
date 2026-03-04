@@ -207,6 +207,7 @@ export default class GameScene extends Phaser.Scene {
         menuBtnImg.on('pointerdown', () => {
             menuBtnImg.setTexture('ui_btn_blue_pressed');
             this.scene.start('LandingScene');
+            this.scene.stop();
         });
     }
 
