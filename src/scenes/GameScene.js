@@ -1,4 +1,4 @@
-import { GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, CASTLE_GX, CASTLE_GY, GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
+import { GRID_COLS, GRID_ROWS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GAME_WIDTH, GAME_HEIGHT } from '../config/gameConfig.js';
 import GridSystem from '../systems/GridSystem.js';
 import Castle from '../entities/Castle.js';
 import SelectionSystem from '../systems/SelectionSystem.js';
@@ -13,14 +13,8 @@ import WaveSystem from '../systems/WaveSystem.js';
 import CameraSystem from '../systems/CameraSystem.js';
 import GameAPI from '../api/GameAPI.js';
 import { t } from '../i18n/i18n.js';
-
-// Tilemap_Flat frame indices (10 cols × 4 rows)
-// Green grass: top-left corner at (0,0), center fill at (1,1)
-const GRASS = {
-    TL: 0,  T: 1,  TR: 2,
-    L: 10,  C: 11, R: 12,
-    BL: 20, B: 21, BR: 22
-};
+import { getRandomMap } from '../config/mapDefinitions.js';
+import { renderMap } from '../systems/MapRenderer.js';
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -39,7 +33,11 @@ export default class GameScene extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
         this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-        this.renderTerrain();
+        // Random map selection
+        this.currentMap = getRandomMap();
+        console.log('Map:', this.currentMap.name);
+
+        renderMap(this, this.currentMap, this.gridSystem);
 
         this.placeStartingBuildings();
 
@@ -69,40 +67,11 @@ export default class GameScene extends Phaser.Scene {
     }
 
     placeStartingBuildings() {
-        // Castle at map center
-        this.castle = new Castle(this, this.gridSystem, CASTLE_GX, CASTLE_GY);
+        // Castle position from map data
+        const gx = this.currentMap.castleGX;
+        const gy = this.currentMap.castleGY;
+        this.castle = new Castle(this, this.gridSystem, gx, gy);
         this.buildings.push(this.castle);
-    }
-
-    renderTerrain() {
-        // Grass fills entire grid
-        const grassLeft = 0;
-        const grassRight = GRID_COLS - 1;
-        const grassTop = 0;
-        const grassBottom = GRID_ROWS - 1;
-
-        for (let gy = grassTop; gy <= grassBottom; gy++) {
-            for (let gx = grassLeft; gx <= grassRight; gx++) {
-                const { x, y } = this.gridSystem.gridToPixel(gx, gy);
-                let frame = GRASS.C;
-
-                const isTop = gy === grassTop;
-                const isBottom = gy === grassBottom;
-                const isLeft = gx === grassLeft;
-                const isRight = gx === grassRight;
-
-                if (isTop && isLeft) frame = GRASS.TL;
-                else if (isTop && isRight) frame = GRASS.TR;
-                else if (isBottom && isLeft) frame = GRASS.BL;
-                else if (isBottom && isRight) frame = GRASS.BR;
-                else if (isTop) frame = GRASS.T;
-                else if (isBottom) frame = GRASS.B;
-                else if (isLeft) frame = GRASS.L;
-                else if (isRight) frame = GRASS.R;
-
-                this.add.image(x, y, 'tilemap_flat', frame);
-            }
-        }
     }
 
     update(time, delta) {

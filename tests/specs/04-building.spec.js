@@ -8,7 +8,8 @@ test.describe('Building System', () => {
 
         await page.evaluate(() => window.gameAPI.setGold(500));
 
-        const result = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(3, 3));
+        const result = await page.evaluate(([gx, gy]) => window.gameAPI.buildStructure('barracks', gx, gy), [pos.gx, pos.gy]);
         expect(result.success).toBe(true);
         expect(result.buildingId).toBeTruthy();
 
@@ -25,7 +26,8 @@ test.describe('Building System', () => {
 
         await page.evaluate(() => window.gameAPI.setGold(500));
 
-        const result = await page.evaluate(() => window.gameAPI.buildStructure('goldmine', 7, 5));
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(3, 2));
+        const result = await page.evaluate(([gx, gy]) => window.gameAPI.buildStructure('goldmine', gx, gy), [pos.gx, pos.gy]);
         expect(result.success).toBe(true);
         expect(result.buildingId).toBeTruthy();
 
@@ -40,7 +42,8 @@ test.describe('Building System', () => {
         await waitForGameReady(page);
 
         // Starting gold is 100, barracks costs 150
-        const result = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(3, 3));
+        const result = await page.evaluate(([gx, gy]) => window.gameAPI.buildStructure('barracks', gx, gy), [pos.gx, pos.gy]);
         expect(result.success).toBe(false);
         expect(result.reason).toBe('insufficient_gold');
     });
@@ -49,8 +52,9 @@ test.describe('Building System', () => {
         await waitForGameReady(page);
         await page.evaluate(() => window.gameAPI.setGold(500));
 
-        // Castle is at (17,10) — try to build overlapping
-        const result = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 17, 10));
+        // Try to build overlapping the castle (wherever it is)
+        const castle = await page.evaluate(() => window.gameAPI.getCastlePosition());
+        const result = await page.evaluate(([gx, gy]) => window.gameAPI.buildStructure('barracks', gx, gy), [castle.gx, castle.gy]);
         expect(result.success).toBe(false);
         expect(result.reason).toBe('invalid_placement');
     });

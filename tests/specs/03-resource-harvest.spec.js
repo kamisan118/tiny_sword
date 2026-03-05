@@ -8,7 +8,8 @@ test.describe('Resource Generation', () => {
 
         // Build a gold mine (costs 100)
         await page.evaluate(() => window.gameAPI.setGold(200));
-        const result = await page.evaluate(() => window.gameAPI.buildStructure('goldmine', 7, 5));
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(3, 2));
+        const result = await page.evaluate(([gx, gy]) => window.gameAPI.buildStructure('goldmine', gx, gy), [pos.gx, pos.gy]);
         expect(result.success).toBe(true);
 
         const stateAfterBuild = await getGameState(page);

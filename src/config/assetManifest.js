@@ -8,6 +8,7 @@ const RESOURCES = 'assets/Resources';
 const TERRAIN = 'assets/Terrain';
 const EFFECTS = 'assets/Effects';
 const UI = 'assets/UI Elements';
+const DECO = 'assets/Decorations';
 
 // Spritesheet definitions: { key, path, frameWidth, frameHeight }
 export const spritesheets = [
@@ -39,7 +40,21 @@ export const spritesheets = [
     { key: 'gold_spawn',       path: `${RESOURCES}/Resources/G_Spawn.png`,    frameWidth: 128, frameHeight: 128 },
 
     // --- Terrain ---
-    { key: 'tilemap_flat',     path: `${TERRAIN}/Ground/Tilemap_Flat.png`,    frameWidth: 64, frameHeight: 64 },
+    { key: 'tilemap_flat',       path: `${TERRAIN}/Ground/Tilemap_Flat.png`,          frameWidth: 64, frameHeight: 64 },
+    { key: 'tilemap_elevation',  path: `${TERRAIN}/Ground/Tilemap_Elevation.png`,     frameWidth: 64, frameHeight: 64 },
+    { key: 'bridge',             path: `${TERRAIN}/Bridge/Bridge_All.png`,            frameWidth: 64, frameHeight: 64 },
+
+    // --- Trees (animated, 192×256, 8 frames) ---
+    { key: 'tree1', path: `${DECO}/Trees/Tree1.png`, frameWidth: 192, frameHeight: 256 },
+    { key: 'tree2', path: `${DECO}/Trees/Tree2.png`, frameWidth: 192, frameHeight: 256 },
+    { key: 'tree3', path: `${DECO}/Trees/Tree3.png`, frameWidth: 192, frameHeight: 192 },
+    { key: 'tree4', path: `${DECO}/Trees/Tree4.png`, frameWidth: 192, frameHeight: 192 },
+
+    // --- Bushes (animated, 128×128, 8 frames) ---
+    { key: 'bush1', path: `${DECO}/Bushes/Bushe1.png`, frameWidth: 128, frameHeight: 128 },
+    { key: 'bush2', path: `${DECO}/Bushes/Bushe2.png`, frameWidth: 128, frameHeight: 128 },
+    { key: 'bush3', path: `${DECO}/Bushes/Bushe3.png`, frameWidth: 128, frameHeight: 128 },
+    { key: 'bush4', path: `${DECO}/Bushes/Bushe4.png`, frameWidth: 128, frameHeight: 128 },
 
     // --- UI Bars (spritesheet for 3-slice) ---
     { key: 'ui_bigbar_base',   path: `${UI}/UI Elements/Bars/BigBar_Base.png`, frameWidth: 64, frameHeight: 64 },
@@ -70,6 +85,34 @@ export const images = [
 
     // --- Terrain ---
     { key: 'water',                path: `${TERRAIN}/Water/Water.png` },
+
+    // --- Decorations (static) ---
+    { key: 'rock1',    path: `${DECO}/Rocks/Rock1.png` },
+    { key: 'rock2',    path: `${DECO}/Rocks/Rock2.png` },
+    { key: 'rock3',    path: `${DECO}/Rocks/Rock3.png` },
+    { key: 'rock4',    path: `${DECO}/Rocks/Rock4.png` },
+    { key: 'stump1',   path: `${DECO}/Trees/Stump1.png` },
+    { key: 'stump2',   path: `${DECO}/Trees/Stump2.png` },
+    { key: 'stump3',   path: `${DECO}/Trees/Stump3.png` },
+    { key: 'stump4',   path: `${DECO}/Trees/Stump4.png` },
+    { key: 'deco_01',  path: `${DECO}/Deco/01.png` },
+    { key: 'deco_02',  path: `${DECO}/Deco/02.png` },
+    { key: 'deco_03',  path: `${DECO}/Deco/03.png` },
+    { key: 'deco_04',  path: `${DECO}/Deco/04.png` },
+    { key: 'deco_05',  path: `${DECO}/Deco/05.png` },
+    { key: 'deco_06',  path: `${DECO}/Deco/06.png` },
+    { key: 'deco_07',  path: `${DECO}/Deco/07.png` },
+    { key: 'deco_08',  path: `${DECO}/Deco/08.png` },
+    { key: 'deco_09',  path: `${DECO}/Deco/09.png` },
+    { key: 'deco_10',  path: `${DECO}/Deco/10.png` },
+    { key: 'deco_11',  path: `${DECO}/Deco/11.png` },
+    { key: 'deco_12',  path: `${DECO}/Deco/12.png` },
+    { key: 'deco_13',  path: `${DECO}/Deco/13.png` },
+    { key: 'deco_14',  path: `${DECO}/Deco/14.png` },
+    { key: 'deco_15',  path: `${DECO}/Deco/15.png` },
+    { key: 'deco_16',  path: `${DECO}/Deco/16.png` },
+    { key: 'deco_17',  path: `${DECO}/Deco/17.png` },
+    { key: 'deco_18',  path: `${DECO}/Deco/18.png` },
 
     // --- UI Elements ---
     { key: 'ui_carved',           path: `${UI}/Banners/Carved_3Slides.png` },

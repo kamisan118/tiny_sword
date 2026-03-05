@@ -19,19 +19,6 @@ const WAVE_DEFS = [
 
 const DIRECTIONS = ['top', 'bottom', 'left', 'right'];
 
-function getSpawnPosition(direction, index) {
-    switch (direction) {
-        case 'top':
-            return { gx: 2 + (index % (GRID_COLS - 4)), gy: 1 };
-        case 'bottom':
-            return { gx: 2 + (index % (GRID_COLS - 4)), gy: GRID_ROWS - 2 };
-        case 'left':
-            return { gx: 1, gy: 2 + (index % (GRID_ROWS - 4)) };
-        case 'right':
-            return { gx: GRID_COLS - 2, gy: 2 + (index % (GRID_ROWS - 4)) };
-    }
-}
-
 export default class WaveSystem {
     constructor(scene) {
         this.scene = scene;
@@ -73,18 +60,57 @@ export default class WaveSystem {
         // Pick a random direction for this wave
         this.lastSpawnDirection = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
 
-        let spawnIndex = 0;
         for (const group of waveDef) {
             for (let i = 0; i < group.count; i++) {
-                const { gx, gy } = getSpawnPosition(this.lastSpawnDirection, spawnIndex);
+                const pos = this.findWalkableSpawn(this.lastSpawnDirection);
+                if (!pos) continue;
 
-                const enemy = this.createEnemy(group.type, gx, gy);
+                const enemy = this.createEnemy(group.type, pos.gx, pos.gy);
                 if (enemy) {
                     this.scene.enemyUnits.push(enemy);
                 }
-                spawnIndex++;
             }
         }
+    }
+
+    /**
+     * Find a walkable spawn position on a map edge.
+     * Collects all walkable cells on the preferred direction first,
+     * then falls back to other directions if none found.
+     */
+    findWalkableSpawn(direction) {
+        const grid = this.scene.gridSystem;
+        const dirs = [direction, ...DIRECTIONS.filter(d => d !== direction)];
+
+        for (const dir of dirs) {
+            const candidates = this._getEdgeCandidates(dir).filter(
+                p => grid.isWalkable(p.gx, p.gy)
+            );
+            if (candidates.length > 0) {
+                return candidates[Math.floor(Math.random() * candidates.length)];
+            }
+        }
+        return null;
+    }
+
+    /** Return all edge cells for a given direction. */
+    _getEdgeCandidates(direction) {
+        const cells = [];
+        switch (direction) {
+            case 'top':
+                for (let gx = 1; gx < GRID_COLS - 1; gx++) cells.push({ gx, gy: 1 });
+                break;
+            case 'bottom':
+                for (let gx = 1; gx < GRID_COLS - 1; gx++) cells.push({ gx, gy: GRID_ROWS - 2 });
+                break;
+            case 'left':
+                for (let gy = 1; gy < GRID_ROWS - 1; gy++) cells.push({ gx: 1, gy });
+                break;
+            case 'right':
+                for (let gy = 1; gy < GRID_ROWS - 1; gy++) cells.push({ gx: GRID_COLS - 2, gy });
+                break;
+        }
+        return cells;
     }
 
     createEnemy(type, gx, gy) {

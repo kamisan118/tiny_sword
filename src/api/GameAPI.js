@@ -16,6 +16,34 @@ export default class GameAPI {
 
     // --- State Queries ---
 
+    getCastlePosition() {
+        const c = this.scene.castle;
+        return { gx: c.gx, gy: c.gy };
+    }
+
+    getMapName() {
+        return this.scene.currentMap?.name || 'unknown';
+    }
+
+    /** Find a free walkable position for building (w×h) near the castle. */
+    findBuildablePosition(w = 3, h = 3) {
+        const gs = this.scene.gridSystem;
+        const cx = this.scene.castle.gx;
+        const cy = this.scene.castle.gy;
+        // Spiral outward from castle
+        for (let radius = 6; radius < 15; radius++) {
+            for (let dx = -radius; dx <= radius; dx++) {
+                for (let dy = -radius; dy <= radius; dy++) {
+                    if (Math.abs(dx) !== radius && Math.abs(dy) !== radius) continue;
+                    const gx = cx + dx, gy = cy + dy;
+                    if (gx < 1 || gy < 1 || gx + w > 39 || gy + h > 23) continue;
+                    if (gs.isFree(gx, gy, w, h)) return { gx, gy };
+                }
+            }
+        }
+        return null;
+    }
+
     getGameState() {
         const s = this.scene;
         return {

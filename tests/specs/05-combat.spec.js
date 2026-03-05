@@ -6,7 +6,8 @@ test.describe('Combat System', () => {
         const errors = collectPageErrors(page);
         await waitForGameReady(page);
 
-        const result = await page.evaluate(() => window.gameAPI.spawnTestEnemy('torch', 18, 5));
+        const castle = await page.evaluate(() => window.gameAPI.getCastlePosition());
+        const result = await page.evaluate(([gx, gy]) => window.gameAPI.spawnTestEnemy('torch', gx, gy), [castle.gx + 3, castle.gy]);
         expect(result.success).toBe(true);
 
         const state = await getGameState(page);
@@ -21,11 +22,12 @@ test.describe('Combat System', () => {
 
         // Build barracks and produce warrior
         await page.evaluate(() => window.gameAPI.setGold(1000));
-        const buildResult = await page.evaluate(() => window.gameAPI.buildStructure('barracks', 8, 4));
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(3, 3));
+        const buildResult = await page.evaluate(([gx, gy]) => window.gameAPI.buildStructure('barracks', gx, gy), [pos.gx, pos.gy]);
         await page.evaluate((bid) => window.gameAPI.produceUnit(bid, 'warrior'), buildResult.buildingId);
 
-        // Spawn an enemy nearby
-        const enemyResult = await page.evaluate(() => window.gameAPI.spawnTestEnemy('barrel', 10, 6));
+        // Spawn an enemy near the barracks so warrior can reach it
+        const enemyResult = await page.evaluate(([gx, gy]) => window.gameAPI.spawnTestEnemy('barrel', gx + 4, gy), [pos.gx, pos.gy]);
         const enemyId = enemyResult.unitId;
 
         let state = await getGameState(page);

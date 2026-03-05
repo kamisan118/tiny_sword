@@ -8,16 +8,18 @@ test.describe('New Buildings and Units', () => {
         await waitForGameReady(page);
         await page.evaluate(() => window.gameAPI.setGold(5000));
 
-        // Build each new type at different positions
-        for (const [type, gx, gy] of [
-            ['tower', 5, 5],
-            ['archery', 8, 5],
-            ['house', 12, 5],
-            ['monastery', 15, 5],
-        ]) {
+        // Build each new type at dynamically found buildable positions
+        const buildTypes = [
+            ['tower', 2, 3],
+            ['archery', 3, 3],
+            ['house', 2, 2],
+            ['monastery', 3, 3],
+        ];
+        for (const [type, w, h] of buildTypes) {
+            const pos = await page.evaluate(([bw, bh]) => window.gameAPI.findBuildablePosition(bw, bh), [w, h]);
             const result = await page.evaluate(
                 ([t, x, y]) => window.gameAPI.buildStructure(t, x, y),
-                [type, gx, gy]
+                [type, pos.gx, pos.gy]
             );
             expect(result.success).toBe(true);
         }
@@ -33,9 +35,11 @@ test.describe('New Buildings and Units', () => {
         await waitForGameReady(page);
         await page.evaluate(() => window.gameAPI.setGold(5000));
 
-        // Build archery
-        const build = await page.evaluate(() =>
-            window.gameAPI.buildStructure('archery', 5, 5)
+        // Build archery at a buildable position
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(3, 3));
+        const build = await page.evaluate(([gx, gy]) =>
+            window.gameAPI.buildStructure('archery', gx, gy),
+            [pos.gx, pos.gy]
         );
         expect(build.success).toBe(true);
 
@@ -66,9 +70,11 @@ test.describe('New Buildings and Units', () => {
         await waitForGameReady(page);
         await page.evaluate(() => window.gameAPI.setGold(5000));
 
-        // Build monastery
-        const build = await page.evaluate(() =>
-            window.gameAPI.buildStructure('monastery', 5, 5)
+        // Build monastery at a buildable position
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(3, 3));
+        const build = await page.evaluate(([gx, gy]) =>
+            window.gameAPI.buildStructure('monastery', gx, gy),
+            [pos.gx, pos.gy]
         );
         expect(build.success).toBe(true);
 
@@ -106,8 +112,10 @@ test.describe('New Buildings and Units', () => {
         expect(initialState.popCap).toBe(10);
 
         // Build house
-        const build = await page.evaluate(() =>
-            window.gameAPI.buildStructure('house', 5, 5)
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(2, 2));
+        const build = await page.evaluate(([gx, gy]) =>
+            window.gameAPI.buildStructure('house', gx, gy),
+            [pos.gx, pos.gy]
         );
         expect(build.success).toBe(true);
 
@@ -132,8 +140,10 @@ test.describe('New Buildings and Units', () => {
         });
 
         // Build barracks
-        const build = await page.evaluate(() =>
-            window.gameAPI.buildStructure('barracks', 5, 5)
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(3, 3));
+        const build = await page.evaluate(([gx, gy]) =>
+            window.gameAPI.buildStructure('barracks', gx, gy),
+            [pos.gx, pos.gy]
         );
         expect(build.success).toBe(true);
 
@@ -169,14 +179,17 @@ test.describe('New Buildings and Units', () => {
         await page.evaluate(() => window.gameAPI.setGold(5000));
 
         // Build tower
-        const build = await page.evaluate(() =>
-            window.gameAPI.buildStructure('tower', 10, 10)
+        const pos = await page.evaluate(() => window.gameAPI.findBuildablePosition(2, 3));
+        const build = await page.evaluate(([gx, gy]) =>
+            window.gameAPI.buildStructure('tower', gx, gy),
+            [pos.gx, pos.gy]
         );
         expect(build.success).toBe(true);
 
         // Spawn enemy near tower
-        const enemy = await page.evaluate(() =>
-            window.gameAPI.spawnTestEnemy('torch', 12, 10)
+        const enemy = await page.evaluate(([gx, gy]) =>
+            window.gameAPI.spawnTestEnemy('torch', gx + 1, gy),
+            [pos.gx, pos.gy]
         );
         expect(enemy.success).toBe(true);
 

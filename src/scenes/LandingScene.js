@@ -13,6 +13,9 @@ export default class LandingScene extends Phaser.Scene {
         // Animated video background (DOM element behind transparent canvas)
         this._createVideoBg();
 
+        // Ensure video is removed when scene stops
+        this.events.once('shutdown', this._removeVideoBg, this);
+
         // --- Language toggle button (top-left) ---
         const langBtn = this.add.image(40, 40, 'ui_btn_sq_blue')
             .setDisplaySize(50, 50).setInteractive();
