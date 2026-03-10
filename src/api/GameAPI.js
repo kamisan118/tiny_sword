@@ -289,6 +289,37 @@ export default class GameAPI {
         return { success: false, reason: 'unknown_type' };
     }
 
+    /** Spawn a warrior near the castle for testing. */
+    spawnWarrior() {
+        const cell = this.scene.gridSystem.findAdjacentFreeCell(
+            this.scene.castle.gx,
+            this.scene.castle.gy,
+            this.scene.castle.gridW,
+            this.scene.castle.gridH
+        );
+        if (!cell) return null;
+
+        const unit = new Warrior(this.scene, this.scene.gridSystem, cell.gx, cell.gy);
+        this.scene.playerUnits.push(unit);
+        return unit.id;
+    }
+
+    /** Get all player units. */
+    getAllPlayerUnits() {
+        return this.scene.playerUnits.filter(u => u.alive).map(u => ({
+            id: u.id,
+            type: u.type,
+            x: u.sprite.x,
+            y: u.sprite.y
+        }));
+    }
+
+    /** Deselect all units. */
+    deselectAll() {
+        this.scene.selectionSystem.deselectAll();
+        return true;
+    }
+
     // --- Internal ---
 
     _findUnit(unitId) {

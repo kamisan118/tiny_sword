@@ -10,24 +10,44 @@ export default class ControlGroupSystem {
         this.lastKeyPress = {};
         this.doubleTapDelay = 300; // ms
 
+        // Visual indicators for control groups
+        this.groupIndicators = new Map(); // unit -> text object
+
+        // Keyboard handler reference for cleanup
+        this.keyboardHandler = null;
+
         this.setupInput();
     }
 
     setupInput() {
-        // Listen for number keys 1-9
-        for (let i = 1; i <= 9; i++) {
-            const key = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[`DIGIT${i}`]);
+        // Use native DOM event listener instead of Phaser's key.on('down')
+        // because Phaser doesn't fire key events when Ctrl is held
+        this.keyboardHandler = (event) => {
+            // Only handle Digit1-9 keys
+            if (!event.code || !event.code.startsWith('Digit')) {
+                return;
+            }
 
-            key.on('down', () => {
-                this.handleNumberKey(i);
-            });
-        }
+            // Prevent default browser behavior for Ctrl+Number
+            if (event.ctrlKey) {
+                event.preventDefault();
+            }
+
+            // Extract number from code (Digit1 -> 1)
+            const number = parseInt(event.code.replace('Digit', ''), 10);
+            if (number >= 1 && number <= 9) {
+                this.handleNumberKey(number, event.ctrlKey);
+            }
+        };
+
+        // Add native keyboard listener
+        window.addEventListener('keydown', this.keyboardHandler);
+
+        console.log('✅ ControlGroupSystem initialized with native keyboard listener');
     }
 
-    handleNumberKey(number) {
-        const ctrlPressed = this.scene.input.keyboard.checkDown(
-            this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
-        );
+    handleNumberKey(number, ctrlPressed) {
+        console.log(`Number ${number} pressed, Ctrl: ${ctrlPressed}`);
 
         if (ctrlPressed) {
             // Ctrl+Number: Create control group
@@ -56,11 +76,15 @@ export default class ControlGroupSystem {
         if (selectedUnits.length === 0) {
             // Clear the control group if no units selected
             this.controlGroups[number] = [];
+            this.updateVisualIndicators();
             return;
         }
 
         // Store unit IDs instead of direct references
         this.controlGroups[number] = selectedUnits.map(unit => unit.id);
+
+        // Update visual indicators
+        this.updateVisualIndicators();
 
         console.log(`Control group ${number} created with ${selectedUnits.length} units`);
     }
@@ -157,6 +181,41 @@ export default class ControlGroupSystem {
         }
     }
 
+    updateVisualIndicators() {
+        // Clear existing indicators
+        for (const [unit, textObj] of this.groupIndicators.entries()) {
+            if (textObj && textObj.destroy) {
+                textObj.destroy();
+            }
+        }
+        this.groupIndicators.clear();
+
+        // Create new indicators for units in control groups
+        for (let groupNum = 1; groupNum <= 9; groupNum++) {
+            const unitIds = this.controlGroups[groupNum];
+            if (!unitIds || unitIds.length === 0) continue;
+
+            for (const unitId of unitIds) {
+                const unit = this.scene.playerUnits.find(u => u.id === unitId && u.alive);
+                if (!unit) continue;
+
+                // Create text indicator above unit
+                const sprite = unit.sprite;
+                const text = this.scene.add.text(sprite.x, sprite.y - 20, groupNum.toString(), {
+                    fontSize: '14px',
+                    fontStyle: 'bold',
+                    color: '#FFFF00', // Yellow
+                    stroke: '#000000',
+                    strokeThickness: 3
+                });
+                text.setOrigin(0.5, 0.5);
+                text.setDepth(1000);
+
+                this.groupIndicators.set(unit, text);
+            }
+        }
+    }
+
     update() {
         // Periodically clean up all control groups
         for (let i = 1; i <= 9; i++) {
@@ -164,5 +223,31 @@ export default class ControlGroupSystem {
                 this.cleanupControlGroup(i);
             }
         }
+
+        // Update indicator positions
+        for (const [unit, textObj] of this.groupIndicators.entries()) {
+            if (unit.alive && textObj && !textObj.destroyed) {
+                textObj.setPosition(unit.sprite.x, unit.sprite.y - 20);
+            } else if (textObj && !textObj.destroyed) {
+                textObj.destroy();
+                this.groupIndicators.delete(unit);
+            }
+        }
+    }
+
+    destroy() {
+        // Remove keyboard event listener
+        if (this.keyboardHandler) {
+            window.removeEventListener('keydown', this.keyboardHandler);
+            this.keyboardHandler = null;
+        }
+
+        // Clean up all visual indicators
+        for (const [unit, textObj] of this.groupIndicators.entries()) {
+            if (textObj && textObj.destroy) {
+                textObj.destroy();
+            }
+        }
+        this.groupIndicators.clear();
     }
 }
