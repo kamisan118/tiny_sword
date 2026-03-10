@@ -29,4 +29,35 @@ test.describe('Wave System', () => {
             return s.wave.current >= 2;
         }, { timeout: 5000 });
     });
+
+    test('game supports 20 waves', async ({ page }) => {
+        await waitForGameReady(page);
+
+        // Verify MAX_WAVES is set to 20
+        const maxWaves = await page.evaluate(() => {
+            const scene = window.game.scene.getScene('GameScene');
+            return scene.waveSystem.maxWaves;
+        });
+
+        expect(maxWaves).toBe(20);
+    });
+
+    test('wave 20 spawns enemies', async ({ page }) => {
+        const errors = collectPageErrors(page);
+        await waitForGameReady(page);
+
+        // Skip to wave 20 (final wave)
+        await page.evaluate(() => window.gameAPI.skipToWave(20));
+
+        // Poll until wave 20 spawns enemies
+        await page.waitForFunction(() => {
+            const s = window.gameAPI.getGameState();
+            return s.wave.current >= 20 && s.enemyUnits.length > 0;
+        }, { timeout: 5000 });
+
+        const state = await page.evaluate(() => window.gameAPI.getGameState());
+        // Wave 20 should have many enemies (122 total in definition)
+        expect(state.enemyUnits.length).toBeGreaterThan(50);
+        expect(errors).toHaveLength(0);
+    });
 });

@@ -14,8 +14,9 @@ test.describe('Scrollable Map', () => {
         const scrolledX = initial.scrollX;
         const scrolledY = initial.scrollY;
         const after = await page.evaluate(() => window.gameAPI.scrollCamera(200, 100));
-        expect(after.scrollX).toBe(Math.min(1280, Math.max(0, scrolledX + 200)));
-        expect(after.scrollY).toBe(Math.min(768, Math.max(0, scrolledY + 100)));
+        // Camera bounds: max scrollX = 5120 - 1280 = 3840, max scrollY = 3072 - 768 = 2304
+        expect(after.scrollX).toBe(Math.min(3840, Math.max(0, scrolledX + 200)));
+        expect(after.scrollY).toBe(Math.min(2304, Math.max(0, scrolledY + 100)));
     });
 
     test('camera respects world bounds', async ({ page }) => {
@@ -24,9 +25,9 @@ test.describe('Scrollable Map', () => {
         await page.evaluate(() => window.gameAPI.scrollCamera(9999, 9999));
         const state = await page.evaluate(() => window.gameAPI.getCameraState());
 
-        // Camera bounds: max scrollX = 2560 - 1280 = 1280, max scrollY = 1536 - 768 = 768
-        expect(state.scrollX).toBeLessThanOrEqual(1280);
-        expect(state.scrollY).toBeLessThanOrEqual(768);
+        // Camera bounds: max scrollX = 5120 - 1280 = 3840, max scrollY = 3072 - 768 = 2304
+        expect(state.scrollX).toBeLessThanOrEqual(3840);
+        expect(state.scrollY).toBeLessThanOrEqual(2304);
     });
 
     test('keyboard arrow keys scroll the camera', async ({ page }) => {
@@ -41,7 +42,7 @@ test.describe('Scrollable Map', () => {
         expect(after.scrollX).toBeGreaterThan(before.scrollX);
     });
 
-    test('map has expanded grid (40x24)', async ({ page }) => {
+    test('map has expanded grid (80x48)', async ({ page }) => {
         await waitForGameReady(page);
 
         const gridInfo = await page.evaluate(() => {
@@ -50,7 +51,7 @@ test.describe('Scrollable Map', () => {
             return { rows: grid.length, cols: grid[0].length };
         });
 
-        expect(gridInfo.rows).toBe(24);
-        expect(gridInfo.cols).toBe(40);
+        expect(gridInfo.rows).toBe(48);
+        expect(gridInfo.cols).toBe(80);
     });
 });
