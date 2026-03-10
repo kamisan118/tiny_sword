@@ -299,6 +299,8 @@ export default class Unit {
 
     setSelected(selected) {
         this.selected = selected;
+        if (!this.selectionCircle) return; // Unit is dead or selectionCircle destroyed
+
         this.selectionCircle.setVisible(selected);
 
         // Pulse animation on select

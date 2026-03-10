@@ -119,6 +119,70 @@ export default class GameAPI {
         return true;
     }
 
+    /** Select multiple units by box (world coordinates). Returns count selected. */
+    boxSelectUnits(x1, y1, x2, y2) {
+        const minX = Math.min(x1, x2);
+        const minY = Math.min(y1, y2);
+        const maxX = Math.max(x1, x2);
+        const maxY = Math.max(y1, y2);
+
+        this.scene.selectionSystem.deselectAll();
+
+        let count = 0;
+        for (const unit of this.scene.playerUnits) {
+            if (!unit.alive) continue;
+            const ux = unit.sprite.x;
+            const uy = unit.sprite.y;
+            if (ux >= minX && ux <= maxX && uy >= minY && uy <= maxY) {
+                this.scene.selectionSystem.selectUnit(unit);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /** Create a control group. Returns true if successful. */
+    createControlGroup(groupNumber, unitIds = null) {
+        if (groupNumber < 1 || groupNumber > 9) return false;
+
+        // If unitIds provided, select those units first
+        if (unitIds && Array.isArray(unitIds)) {
+            this.scene.selectionSystem.deselectAll();
+            for (const id of unitIds) {
+                const unit = this._findUnit(id);
+                if (unit && unit.alive) {
+                    this.scene.selectionSystem.selectUnit(unit);
+                }
+            }
+        }
+
+        // Store current selection as control group
+        this.scene.controlGroupSystem.createControlGroup(groupNumber);
+        return true;
+    }
+
+    /** Select a control group. Returns count of units selected. */
+    selectControlGroup(groupNumber) {
+        if (groupNumber < 1 || groupNumber > 9) return 0;
+
+        const beforeCount = this.scene.selectionSystem.selectedUnits.length;
+        this.scene.controlGroupSystem.selectControlGroup(groupNumber);
+        return this.scene.selectionSystem.selectedUnits.length;
+    }
+
+    /** Get control group info. Returns array of unit IDs. */
+    getControlGroup(groupNumber) {
+        if (groupNumber < 1 || groupNumber > 9) return [];
+        return this.scene.controlGroupSystem.controlGroups[groupNumber] || [];
+    }
+
+    /** Get selected unit IDs. */
+    getSelectedUnits() {
+        return this.scene.selectionSystem.selectedUnits
+            .filter(u => u.alive)
+            .map(u => u.id);
+    }
+
     commandMove(unitId, gx, gy) {
         const unit = this._findUnit(unitId);
         if (!unit || !unit.alive) return false;

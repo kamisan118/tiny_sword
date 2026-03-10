@@ -12,6 +12,7 @@ import Minimap from '../ui/Minimap.js';
 import CombatSystem from '../systems/CombatSystem.js';
 import WaveSystem from '../systems/WaveSystem.js';
 import CameraSystem from '../systems/CameraSystem.js';
+import ControlGroupSystem from '../systems/ControlGroupSystem.js';
 import GameAPI from '../api/GameAPI.js';
 import { t } from '../i18n/i18n.js';
 import { getRandomMap } from '../config/mapDefinitions.js';
@@ -51,6 +52,7 @@ export default class GameScene extends Phaser.Scene {
         this.resourceSystem = new ResourceSystem(this.eventBus);
         this.commandSystem = new CommandSystem(this);
         this.selectionSystem = new SelectionSystem(this);
+        this.controlGroupSystem = new ControlGroupSystem(this, this.selectionSystem);
         this.hud = new HUD(this, this.eventBus);
         this.buildSystem = new BuildSystem(this);
         this.buildMenu = new BuildMenu(this);
@@ -106,6 +108,11 @@ export default class GameScene extends Phaser.Scene {
 
         // Update wave system
         this.waveSystem.update(time, delta);
+
+        // Update control group system (cleanup dead units)
+        if (this.controlGroupSystem) {
+            this.controlGroupSystem.update();
+        }
 
         // Clean up dead units (free population for dead player units)
         const beforeCount = this.playerUnits.length;
