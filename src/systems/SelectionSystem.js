@@ -4,14 +4,41 @@ export default class SelectionSystem {
         this.selectedUnits = [];
         this.selectedBuilding = null;
 
+        // Box selection state
+        this.isDragging = false;
+        this.dragStartX = 0;
+        this.dragStartY = 0;
+        this.selectionBox = null;
+
         this.setupInput();
+        this.createSelectionBox();
+    }
+
+    createSelectionBox() {
+        // Create graphics object for box selection
+        this.selectionBox = this.scene.add.graphics();
+        this.selectionBox.setDepth(10000); // Always on top
     }
 
     setupInput() {
-        // Left-click: select unit or building
+        // Left-click down: start selection or drag
         this.scene.input.on('pointerdown', (pointer) => {
             if (pointer.leftButtonDown()) {
-                this.handleLeftClick(pointer);
+                this.handleLeftClickDown(pointer);
+            }
+        });
+
+        // Pointer move: draw selection box
+        this.scene.input.on('pointermove', (pointer) => {
+            if (this.isDragging) {
+                this.updateSelectionBox(pointer);
+            }
+        });
+
+        // Left-click up: complete selection
+        this.scene.input.on('pointerup', (pointer) => {
+            if (pointer.leftButtonReleased()) {
+                this.handleLeftClickUp(pointer);
             }
         });
 
@@ -26,7 +53,62 @@ export default class SelectionSystem {
         this.scene.input.mouse.disableContextMenu();
     }
 
-    handleLeftClick(pointer) {
+    handleLeftClickDown(pointer) {
+        this.isDragging = true;
+        this.dragStartX = pointer.worldX;
+        this.dragStartY = pointer.worldY;
+    }
+
+    updateSelectionBox(pointer) {
+        if (!this.isDragging) return;
+
+        const startX = this.dragStartX;
+        const startY = this.dragStartY;
+        const endX = pointer.worldX;
+        const endY = pointer.worldY;
+
+        // Calculate box dimensions
+        const x = Math.min(startX, endX);
+        const y = Math.min(startY, endY);
+        const width = Math.abs(endX - startX);
+        const height = Math.abs(endY - startY);
+
+        // Draw selection box (only if dragged more than 5 pixels)
+        if (width > 5 || height > 5) {
+            this.selectionBox.clear();
+            this.selectionBox.lineStyle(2, 0x00ff00, 1);
+            this.selectionBox.fillStyle(0x00ff00, 0.2);
+            this.selectionBox.fillRect(x, y, width, height);
+            this.selectionBox.strokeRect(x, y, width, height);
+        }
+    }
+
+    handleLeftClickUp(pointer) {
+        if (!this.isDragging) return;
+
+        const startX = this.dragStartX;
+        const startY = this.dragStartY;
+        const endX = pointer.worldX;
+        const endY = pointer.worldY;
+
+        const dragDistance = Math.sqrt(
+            Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)
+        );
+
+        // Clear selection box graphics
+        this.selectionBox.clear();
+        this.isDragging = false;
+
+        // If drag distance is small, treat as single click
+        if (dragDistance < 5) {
+            this.handleSingleClick(pointer);
+        } else {
+            // Box selection
+            this.handleBoxSelection(startX, startY, endX, endY);
+        }
+    }
+
+    handleSingleClick(pointer) {
         const clickX = pointer.worldX;
         const clickY = pointer.worldY;
 
@@ -65,6 +147,27 @@ export default class SelectionSystem {
             this.selectedBuilding = clickedBuilding;
         } else {
             this.deselectAll();
+        }
+    }
+
+    handleBoxSelection(startX, startY, endX, endY) {
+        // Calculate box bounds
+        const x1 = Math.min(startX, endX);
+        const y1 = Math.min(startY, endY);
+        const x2 = Math.max(startX, endX);
+        const y2 = Math.max(startY, endY);
+
+        // Deselect all first
+        this.deselectAll();
+
+        // Select all units within the box
+        for (const unit of this.scene.playerUnits) {
+            if (!unit.alive) continue;
+            const ux = unit.sprite.x;
+            const uy = unit.sprite.y;
+            if (ux >= x1 && ux <= x2 && uy >= y1 && uy <= y2) {
+                this.selectUnit(unit);
+            }
         }
     }
 

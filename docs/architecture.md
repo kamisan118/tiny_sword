@@ -2,11 +2,11 @@
 
 ## 專案概述
 
-類似星海爭霸的即時戰略防禦遊戲。玩家在地圖上建造基地、訓練兵種、抵禦 10 波哥布林進攻。
+類似星海爭霸的即時戰略防禦遊戲。玩家在地圖上建造基地、訓練兵種、抵禦 20 波哥布林進攻。
 
 **技術棧:** Phaser 3.60 (CDN) + JavaScript ES Modules + live-server
 
-**地圖:** 2560×1536 像素 (40×24 格, 每格 64px)
+**地圖:** 5120×3072 像素 (80×48 格, 每格 64px)
 **視窗:** 1280×768 像素
 **測試:** Playwright + window.gameAPI
 
@@ -42,12 +42,13 @@ src/
 ├── systems/
 │   ├── GridSystem.js          # 網格佔用、座標轉換
 │   ├── ResourceSystem.js      # 金幣與人口管理
-│   ├── SelectionSystem.js     # 滑鼠選取單位/建築
+│   ├── SelectionSystem.js     # 滑鼠選取單位/建築、框選、控制編隊
 │   ├── CommandSystem.js       # 移動/攻擊指令
 │   ├── BuildSystem.js         # 建造模式、放置驗證
 │   ├── CombatSystem.js        # 攻擊目標清理
 │   ├── WaveSystem.js          # 敵波生成計時
-│   └── CameraSystem.js        # 視角捲動 (滑鼠邊緣+鍵盤)
+│   ├── CameraSystem.js        # 視角捲動 (滑鼠邊緣+鍵盤)
+│   └── MinimapSystem.js       # 小地圖系統 (地形、單位、視角)
 ├── ui/
 │   ├── HUD.js                 # 金幣、人口、波次顯示
 │   ├── BuildMenu.js           # 城堡建造選單 (6 項)
@@ -60,11 +61,20 @@ src/
     └── GameAPI.js             # Playwright 測試介面
 
 tests/
-├── specs/                     # 9 個 Playwright 測試模組
+├── specs/                     # 13 個 Playwright 測試模組
 │   ├── 01-game-loads.spec.js
 │   ├── 02-unit-selection.spec.js
-│   ├── ...
-│   └── 09-new-buildings-units.spec.js
+│   ├── 03-resource-harvest.spec.js
+│   ├── 04-building.spec.js
+│   ├── 05-combat.spec.js
+│   ├── 06-wave-system.spec.js
+│   ├── 07-win-lose.spec.js
+│   ├── 08-scrollable-map.spec.js
+│   ├── 09-new-buildings-units.spec.js
+│   ├── 10-landing-scene.spec.js
+│   ├── 11-i18n.spec.js
+│   ├── 12-minimap.spec.js
+│   └── 13-box-selection-control-groups.spec.js
 └── helpers/
     └── gameHelper.js          # 測試輔助函數
 ```
@@ -90,12 +100,13 @@ graph TB
     subgraph Systems["系統層"]
         GS["GridSystem<br/>網格佔用"]
         RS["ResourceSystem<br/>金幣+人口"]
-        SS["SelectionSystem<br/>選取輸入"]
+        SS["SelectionSystem<br/>選取+框選+編隊"]
         CS["CommandSystem<br/>移動/攻擊指令"]
         BS["BuildSystem<br/>建造放置"]
         CB["CombatSystem<br/>戰鬥清理"]
         WS["WaveSystem<br/>敵波生成"]
         CAM["CameraSystem<br/>視角捲動"]
+        MM["MinimapSystem<br/>小地圖"]
     end
 
     subgraph Entities["實體層"]
@@ -399,6 +410,8 @@ sequenceDiagram
 
 ## 波次定義
 
+### 第一階段：學習期 (Wave 1-5)
+
 | 波次 | Torch | Barrel | TNT | 總數 |
 |------|-------|--------|-----|------|
 | 1 | 3 | — | — | 3 |
@@ -406,18 +419,86 @@ sequenceDiagram
 | 3 | 4 | 2 | — | 6 |
 | 4 | 5 | 3 | — | 8 |
 | 5 | 4 | 2 | 1 | 7 |
+
+### 第二階段：成長期 (Wave 6-10)
+
+| 波次 | Torch | Barrel | TNT | 總數 |
+|------|-------|--------|-----|------|
 | 6 | 6 | 3 | 2 | 11 |
-| 7 | 8 | 4 | — | 12 |
+| 7 | 8 | 4 | 2 | 14 |
 | 8 | 6 | 4 | 3 | 13 |
 | 9 | 10 | 5 | 2 | 17 |
 | 10 | 12 | 6 | 4 | 22 |
+
+### 第三階段：快速期 (Wave 11-15)
+
+| 波次 | Torch | Barrel | TNT | 總數 |
+|------|-------|--------|-----|------|
+| 11 | 18 | 9 | 6 | 33 |
+| 12 | 20 | 10 | 7 | 37 |
+| 13 | 22 | 12 | 8 | 42 |
+| 14 | 25 | 14 | 9 | 48 |
+| 15 | 28 | 16 | 10 | 54 |
+
+### 第四階段：極限挑戰 (Wave 16-20)
+
+| 波次 | Torch | Barrel | TNT | 總數 |
+|------|-------|--------|-----|------|
+| 16 | 35 | 20 | 12 | 67 |
+| 17 | 40 | 24 | 14 | 78 |
+| 18 | 45 | 28 | 16 | 89 |
+| 19 | 50 | 32 | 18 | 100 |
+| 20 | 60 | 40 | 22 | 122 |
 
 ---
 
 ## 勝負條件
 
-- **勝利:** 10 波全部生成 + 所有敵人死亡
+- **勝利:** 20 波全部生成 + 所有敵人死亡
 - **失敗:** Castle HP 降到 0
+
+---
+
+## 新增功能特性
+
+### 小地圖系統 (MinimapSystem)
+
+- **位置:** 螢幕右下角，大小 200×120 像素
+- **顯示內容:**
+  - 地形顏色（草地綠、水藍、樹棕、山灰）
+  - 友方單位/建築（藍色點）
+  - 敵方單位（紅色點）
+  - 視角框（白色矩形）
+- **互動:**
+  - 點擊小地圖快速移動視角
+  - M 鍵切換顯示/隱藏
+- **實作:** 使用 RenderTexture 繪製地形，每幀更新單位點位
+
+### 框選系統 (Box Selection)
+
+- **操作:** 左鍵拖曳畫出選取框
+- **視覺:** 半透明藍色矩形框
+- **功能:** 一次選取範圍內所有友方單位
+- **實作:** 在 SelectionSystem 中監聽 pointerdown/move/up，計算矩形與單位碰撞
+
+### 控制編隊 (Control Groups)
+
+- **建立編隊:** Ctrl + 數字鍵 (1-9)
+- **選取編隊:** 數字鍵 (1-9)
+- **容量:** 9 個編隊，每個編隊可包含多個單位
+- **清理:** 單位死亡時自動從編隊移除
+- **實作:** SelectionSystem 維護 controlGroups Map，監聽鍵盤事件
+
+### 隨機地圖生成
+
+- **地圖數量:** 10 種預設地圖
+- **地形類型:**
+  - 草地 (Grass) — 可行走
+  - 樹木 (Trees) — 不可行走
+  - 水域 (Water) — 不可行走
+  - 山地 (Mountains) — 不可行走
+- **生成方式:** LandingScene 選擇隨機地圖，傳遞給 GameScene
+- **佈局:** 每張地圖有不同的地形分布，城堡位置固定居中
 
 ---
 
@@ -446,10 +527,14 @@ graph TB
         T3["03 資源收穫"]
         T4["04 建築系統"]
         T5["05 戰鬥機制"]
-        T6["06 波次系統"]
+        T6["06 波次系統 (20波)"]
         T7["07 勝負條件"]
-        T8["08 地圖捲動"]
+        T8["08 地圖捲動 (80×48)"]
         T9["09 新建築兵種"]
+        T10["10 登陸場景"]
+        T11["11 國際化"]
+        T12["12 小地圖"]
+        T13["13 框選與編隊"]
     end
 ```
 

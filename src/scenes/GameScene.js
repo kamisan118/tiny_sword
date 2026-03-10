@@ -8,9 +8,11 @@ import EventBus from '../utils/EventBus.js';
 import HUD from '../ui/HUD.js';
 import BuildSystem from '../systems/BuildSystem.js';
 import BuildMenu from '../ui/BuildMenu.js';
+import Minimap from '../ui/Minimap.js';
 import CombatSystem from '../systems/CombatSystem.js';
 import WaveSystem from '../systems/WaveSystem.js';
 import CameraSystem from '../systems/CameraSystem.js';
+import ControlGroupSystem from '../systems/ControlGroupSystem.js';
 import GameAPI from '../api/GameAPI.js';
 import { t } from '../i18n/i18n.js';
 import { getRandomMap } from '../config/mapDefinitions.js';
@@ -50,12 +52,14 @@ export default class GameScene extends Phaser.Scene {
         this.resourceSystem = new ResourceSystem(this.eventBus);
         this.commandSystem = new CommandSystem(this);
         this.selectionSystem = new SelectionSystem(this);
+        this.controlGroupSystem = new ControlGroupSystem(this, this.selectionSystem);
         this.hud = new HUD(this, this.eventBus);
         this.buildSystem = new BuildSystem(this);
         this.buildMenu = new BuildMenu(this);
         this.combatSystem = new CombatSystem(this);
         this.waveSystem = new WaveSystem(this);
         this.cameraSystem = new CameraSystem(this);
+        this.minimap = new Minimap(this);
 
         this.gameOver = false;
         this.gameResult = null; // 'victory' or 'defeat'
@@ -78,6 +82,11 @@ export default class GameScene extends Phaser.Scene {
         // Update camera scrolling (works even when game is over)
         this.cameraSystem.update(time, delta);
 
+        // Update minimap (works even when game is over)
+        if (this.minimap) {
+            this.minimap.update();
+        }
+
         if (this.gameOver) return;
 
         // Update all player units
@@ -99,6 +108,11 @@ export default class GameScene extends Phaser.Scene {
 
         // Update wave system
         this.waveSystem.update(time, delta);
+
+        // Update control group system (cleanup dead units)
+        if (this.controlGroupSystem) {
+            this.controlGroupSystem.update();
+        }
 
         // Clean up dead units (free population for dead player units)
         const beforeCount = this.playerUnits.length;
