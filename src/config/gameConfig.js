@@ -77,4 +77,4 @@ export const MONASTERY_HP = 500;
 
 // Wave settings
 export const WAVE_INTERVAL = 60000;  // ms
-export const MAX_WAVES = 10;
+export const MAX_WAVES = 20;
