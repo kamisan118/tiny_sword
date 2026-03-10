@@ -1,15 +1,15 @@
 // Game constants
 export const TILE_SIZE = 64;
-export const GRID_COLS = 40;
-export const GRID_ROWS = 24;
-export const GAME_WIDTH = TILE_SIZE * GRID_COLS;   // 2560
-export const GAME_HEIGHT = TILE_SIZE * GRID_ROWS;  // 1536
+export const GRID_COLS = 80;
+export const GRID_ROWS = 48;
+export const GAME_WIDTH = TILE_SIZE * GRID_COLS;   // 5120
+export const GAME_HEIGHT = TILE_SIZE * GRID_ROWS;  // 3072
 export const VIEWPORT_WIDTH = 1280;
 export const VIEWPORT_HEIGHT = 768;
 
 // Castle starting position (center of map)
-export const CASTLE_GX = 17;
-export const CASTLE_GY = 10;
+export const CASTLE_GX = 37;
+export const CASTLE_GY = 22;
 
 // Starting resources
 export const STARTING_GOLD = 100;
