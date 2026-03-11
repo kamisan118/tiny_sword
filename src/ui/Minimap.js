@@ -1,4 +1,5 @@
 import { GAME_WIDTH, GAME_HEIGHT, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
+import { UnitState } from '../entities/Unit.js';
 
 export default class Minimap {
     constructor(scene) {
@@ -19,8 +20,9 @@ export default class Minimap {
         this.scaleY = this.height / GAME_HEIGHT;
 
         // Create container for all minimap elements
+        // Depth 10056: above BuildMenu backdrop (10050) and buttons (10054-10055)
         this.container = scene.add.container(this.x, this.y);
-        this.container.setScrollFactor(0).setDepth(2000);
+        this.container.setScrollFactor(0).setDepth(10056);
 
         // Background (semi-transparent dark)
         this.background = scene.add.rectangle(0, 0, this.width, this.height, 0x000000, 0.7);
@@ -43,9 +45,22 @@ export default class Minimap {
         this.border.strokeRect(0, 0, this.width, this.height);
         this.container.add(this.border);
 
-        // Make minimap interactive for click-to-move camera
-        this.background.setInteractive();
-        this.background.on('pointerdown', (pointer) => this.onMinimapClick(pointer));
+        // Use scene-level input to handle minimap clicks.
+        // IMPORTANT: setInteractive() on a child inside a container with
+        // setScrollFactor(0) is broken in Phaser 3.60 — the hit area drifts
+        // with the camera scroll while the visual stays fixed on screen.
+        // Instead, we listen at the scene level and do our own screen-space
+        // bounds check via isPointerOverMinimap().
+        this.handledClick = false;
+        scene.input.on('pointerdown', (pointer) => {
+            if (pointer.leftButtonDown()) {
+                this.handledClick = false;
+                if (this.isPointerOverMinimap(pointer)) {
+                    this.onMinimapClick(pointer);
+                    this.handledClick = true;
+                }
+            }
+        });
 
         // M key to toggle visibility
         scene.input.keyboard.on('keydown-M', () => this.toggle());
@@ -128,14 +143,19 @@ export default class Minimap {
             graphics.fillCircle(minimapX, minimapY, 2);
         }
 
-        // Draw player units and buildings (blue dots)
+        // Draw player units and buildings (blue dots, flash red when in combat)
+        const flashCycle = Math.floor(this.scene.time.now / 500) % 2; // 500ms cycle
         for (const unit of this.scene.playerUnits) {
             if (!unit.alive) continue;
 
             const minimapX = unit.x * this.scaleX;
             const minimapY = unit.y * this.scaleY;
 
-            graphics.fillStyle(0x4444ff, 1);
+            // Flash red if unit is attacking, otherwise stay blue
+            const isInCombat = unit.state === UnitState.ATTACKING;
+            const color = (isInCombat && flashCycle === 1) ? 0xff4444 : 0x4444ff;
+
+            graphics.fillStyle(color, 1);
             graphics.fillCircle(minimapX, minimapY, 2);
         }
 
@@ -169,10 +189,21 @@ export default class Minimap {
         this.viewportFrame.strokeRect(frameX, frameY, frameWidth, frameHeight);
     }
 
-    onMinimapClick(pointer) {
-        if (!this.visible) return;
+    /**
+     * Check if the pointer (in screen-space) is over the minimap rectangle.
+     */
+    isPointerOverMinimap(pointer) {
+        if (!this.visible) return false;
+        return (
+            pointer.x >= this.x &&
+            pointer.x <= this.x + this.width &&
+            pointer.y >= this.y &&
+            pointer.y <= this.y + this.height
+        );
+    }
 
-        // Convert pointer position to minimap local coordinates
+    onMinimapClick(pointer) {
+        // pointer.x/y are screen-space, which matches the minimap's fixed position
         const localX = pointer.x - this.x;
         const localY = pointer.y - this.y;
 
@@ -181,7 +212,8 @@ export default class Minimap {
         const worldY = localY / this.scaleY;
 
         // Center camera on clicked position
-        this.scene.cameras.main.centerOn(worldX, worldY);
+        const camera = this.scene.cameras.main;
+        camera.centerOn(worldX, worldY);
     }
 
     toggle() {

@@ -54,6 +54,10 @@ export default class SelectionSystem {
     }
 
     handleLeftClickDown(pointer) {
+        // If the click is over the minimap, let the minimap handle it
+        if (this.scene.minimap && this.scene.minimap.isPointerOverMinimap(pointer)) {
+            return;
+        }
         this.isDragging = true;
         this.dragStartX = pointer.worldX;
         this.dragStartY = pointer.worldY;
@@ -173,6 +177,8 @@ export default class SelectionSystem {
 
     handleRightClick(pointer) {
         if (this.selectedUnits.length === 0) return;
+        // Don't issue commands when clicking on UI elements
+        if (this.scene.minimap && this.scene.minimap.isPointerOverMinimap(pointer)) return;
 
         const clickX = pointer.worldX;
         const clickY = pointer.worldY;
