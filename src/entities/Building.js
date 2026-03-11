@@ -17,6 +17,7 @@ export default class Building {
         this.hp = maxHp;
         this.alive = true;
         this.type = 'building';
+        this.minimapUnderAttackUntil = 0;
 
         // Calculate pixel position (center of grid area + visual offset)
         const px = gx * TILE_SIZE + (gridW * TILE_SIZE) / 2;
@@ -32,8 +33,17 @@ export default class Building {
         this.healthBar = new HealthBar(scene, this, -this.sprite.displayHeight / 2 - 8, 50);
     }
 
-    takeDamage(amount) {
+    takeDamage(amount, attacker = null) {
         if (!this.alive) return;
+
+        if (attacker && attacker.faction === 'enemy' && this.faction === 'player') {
+            const underAttackDuration = Math.max(attacker.attackCooldown || 0, 500);
+            this.minimapUnderAttackUntil = Math.max(
+                this.minimapUnderAttackUntil,
+                this.scene.time.now + underAttackDuration
+            );
+        }
+
         this.hp = Math.max(0, this.hp - amount);
         if (this.healthBar) this.healthBar.update();
 
