@@ -1,4 +1,4 @@
-const SCROLL_SPEED = 300; // pixels per second
+const SCROLL_SPEED = 390; // pixels per second
 
 export default class CameraSystem {
     constructor(scene) {

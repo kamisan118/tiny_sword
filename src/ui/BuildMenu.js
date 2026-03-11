@@ -18,9 +18,9 @@ export default class BuildMenu {
         const btnY = 30;
 
         this.hammerBtnBg = scene.add.image(btnX, btnY, 'ui_btn_sq_blue')
-            .setDisplaySize(50, 50).setDepth(1000).setScrollFactor(0).setInteractive();
+            .setDisplaySize(50, 50).setDepth(10054).setScrollFactor(0).setInteractive();
         this.hammerIcon = scene.add.image(btnX, btnY, 'ui_icon_hammer')
-            .setScale(0.42).setDepth(1001).setScrollFactor(0);
+            .setScale(0.42).setDepth(10055).setScrollFactor(0);
 
         this.hammerBtnBg.on('pointerover', () => {
             this.hammerBtnBg.setTexture('ui_btn_sq_hover');
@@ -58,8 +58,15 @@ export default class BuildMenu {
 
         // Click-outside-to-close backdrop
         this.backdrop = scene.add.rectangle(VIEWPORT_WIDTH / 2, VIEWPORT_HEIGHT / 2, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, 0x000000, 0.15)
-            .setScrollFactor(0).setDepth(949).setInteractive();
-        this.backdrop.on('pointerdown', () => this.closePanel());
+            .setScrollFactor(0).setDepth(10050).setInteractive();
+        this.backdrop.on('pointerdown', (pointer) => {
+            // Don't close if clicking on minimap - let minimap handle the click
+            if (scene.minimap && scene.minimap.isPointerOverMinimap && scene.minimap.isPointerOverMinimap(pointer)) {
+                console.log('🟦 BuildMenu backdrop: click is over minimap, not closing panel');
+                return;
+            }
+            this.closePanel();
+        });
 
         // Panel on the right side — vertical strip
         const items = [
@@ -78,7 +85,7 @@ export default class BuildMenu {
         const panelY = 55 + ph / 2;
 
         this.panelBg = scene.add.rectangle(panelX, panelY, pw, ph, 0x3a2a14, 0.9)
-            .setScrollFactor(0).setDepth(950).setStrokeStyle(2, 0xfef3c0);
+            .setScrollFactor(0).setDepth(10051).setStrokeStyle(2, 0xfef3c0);
 
         const startY = panelY - ((items.length - 1) * rowH) / 2;
         const createdElements = [];
@@ -87,13 +94,13 @@ export default class BuildMenu {
             const rowY = startY + i * rowH;
 
             const icon = scene.add.image(panelX - 55, rowY, item.icon)
-                .setScale(item.iconScale).setScrollFactor(0).setDepth(952);
+                .setScale(item.iconScale).setScrollFactor(0).setDepth(10053);
             const btn = scene.add.image(panelX + 15, rowY, 'ui_btn_blue')
-                .setScale(0.75, 0.65).setScrollFactor(0).setDepth(951).setInteractive();
+                .setScale(0.75, 0.65).setScrollFactor(0).setDepth(10052).setInteractive();
             const label = scene.add.text(panelX + 15, rowY - 8, item.name, style)
-                .setOrigin(0.5).setScrollFactor(0).setDepth(952);
+                .setOrigin(0.5).setScrollFactor(0).setDepth(10053);
             const cost = scene.add.text(panelX + 15, rowY + 8, `${item.cost}g`, { ...style, color: '#ffdd44' })
-                .setOrigin(0.5).setScrollFactor(0).setDepth(952);
+                .setOrigin(0.5).setScrollFactor(0).setDepth(10053);
 
             this._setupItemButton(btn, item.type, item.canAfford);
 
