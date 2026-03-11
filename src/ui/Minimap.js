@@ -1,4 +1,5 @@
 import { GAME_WIDTH, GAME_HEIGHT, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
+import { UnitState } from '../entities/Unit.js';
 
 export default class Minimap {
     constructor(scene) {
@@ -19,8 +20,9 @@ export default class Minimap {
         this.scaleY = this.height / GAME_HEIGHT;
 
         // Create container for all minimap elements
+        // Depth 10056: above BuildMenu backdrop (10050) and buttons (10054-10055)
         this.container = scene.add.container(this.x, this.y);
-        this.container.setScrollFactor(0).setDepth(2000);
+        this.container.setScrollFactor(0).setDepth(10056);
 
         // Background (semi-transparent dark)
         this.background = scene.add.rectangle(0, 0, this.width, this.height, 0x000000, 0.7);
@@ -45,6 +47,12 @@ export default class Minimap {
 
         // Make minimap interactive for click-to-move camera
         this.background.setInteractive();
+        console.log('🎯 Minimap background made interactive:', {
+            interactive: this.background.input?.enabled,
+            bounds: this.background.getBounds(),
+            depth: this.container.depth,
+            visible: this.background.visible
+        });
         this.background.on('pointerdown', (pointer) => this.onMinimapClick(pointer));
 
         // M key to toggle visibility
@@ -128,14 +136,19 @@ export default class Minimap {
             graphics.fillCircle(minimapX, minimapY, 2);
         }
 
-        // Draw player units and buildings (blue dots)
+        // Draw player units and buildings (blue dots, flash red when in combat)
+        const flashCycle = Math.floor(this.scene.time.now / 500) % 2; // 500ms cycle
         for (const unit of this.scene.playerUnits) {
             if (!unit.alive) continue;
 
             const minimapX = unit.x * this.scaleX;
             const minimapY = unit.y * this.scaleY;
 
-            graphics.fillStyle(0x4444ff, 1);
+            // Flash red if unit is attacking, otherwise stay blue
+            const isInCombat = unit.state === UnitState.ATTACKING;
+            const color = (isInCombat && flashCycle === 1) ? 0xff4444 : 0x4444ff;
+
+            graphics.fillStyle(color, 1);
             graphics.fillCircle(minimapX, minimapY, 2);
         }
 
@@ -170,18 +183,49 @@ export default class Minimap {
     }
 
     onMinimapClick(pointer) {
-        if (!this.visible) return;
+        console.log('🎯🎯🎯 MINIMAP CLICK HANDLER FIRED! 🎯🎯🎯');
+        console.log('Minimap visible?', this.visible);
+        console.log('Background interactive?', this.background.input?.enabled);
 
-        // Convert pointer position to minimap local coordinates
+        if (!this.visible) {
+            console.log('❌ Minimap not visible, returning early');
+            return;
+        }
+
+        console.log('=== MINIMAP CLICK DEBUG - REAL POINTER VALUES ===');
+        console.log('REAL POINTER EVENT:', {
+            x: pointer.x,
+            y: pointer.y,
+            worldX: pointer.worldX,
+            worldY: pointer.worldY,
+            downX: pointer.downX,
+            downY: pointer.downY,
+            upX: pointer.upX,
+            upY: pointer.upY,
+            positionX: pointer.position?.x,
+            positionY: pointer.position?.y
+        });
+        console.log('Minimap position - this.x:', this.x, 'this.y:', this.y);
+        console.log('Minimap scale - this.scaleX:', this.scaleX, 'this.scaleY:', this.scaleY);
+
+        const camera = this.scene.cameras.main;
+        console.log('Camera before - scrollX:', camera.scrollX, 'scrollY:', camera.scrollY);
+
+        // For UI elements with setScrollFactor(0), pointer.x/y are in screen space
+        // Just need to convert from screen space to minimap local coordinates
         const localX = pointer.x - this.x;
         const localY = pointer.y - this.y;
+        console.log('Calculated localX:', localX, 'localY:', localY);
 
         // Convert minimap coordinates to world coordinates
         const worldX = localX / this.scaleX;
         const worldY = localY / this.scaleY;
+        console.log('Calculated worldX:', worldX, 'worldY:', worldY);
 
         // Center camera on clicked position
-        this.scene.cameras.main.centerOn(worldX, worldY);
+        camera.centerOn(worldX, worldY);
+        console.log('Camera after - scrollX:', camera.scrollX, 'scrollY:', camera.scrollY);
+        console.log('=================================================');
     }
 
     toggle() {
