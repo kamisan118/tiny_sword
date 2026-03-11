@@ -45,15 +45,22 @@ export default class Minimap {
         this.border.strokeRect(0, 0, this.width, this.height);
         this.container.add(this.border);
 
-        // Make minimap interactive for click-to-move camera
-        this.background.setInteractive();
-        console.log('🎯 Minimap background made interactive:', {
-            interactive: this.background.input?.enabled,
-            bounds: this.background.getBounds(),
-            depth: this.container.depth,
-            visible: this.background.visible
+        // Use scene-level input to handle minimap clicks.
+        // IMPORTANT: setInteractive() on a child inside a container with
+        // setScrollFactor(0) is broken in Phaser 3.60 — the hit area drifts
+        // with the camera scroll while the visual stays fixed on screen.
+        // Instead, we listen at the scene level and do our own screen-space
+        // bounds check via isPointerOverMinimap().
+        this.handledClick = false;
+        scene.input.on('pointerdown', (pointer) => {
+            if (pointer.leftButtonDown()) {
+                this.handledClick = false;
+                if (this.isPointerOverMinimap(pointer)) {
+                    this.onMinimapClick(pointer);
+                    this.handledClick = true;
+                }
+            }
         });
-        this.background.on('pointerdown', (pointer) => this.onMinimapClick(pointer));
 
         // M key to toggle visibility
         scene.input.keyboard.on('keydown-M', () => this.toggle());
@@ -182,50 +189,31 @@ export default class Minimap {
         this.viewportFrame.strokeRect(frameX, frameY, frameWidth, frameHeight);
     }
 
+    /**
+     * Check if the pointer (in screen-space) is over the minimap rectangle.
+     */
+    isPointerOverMinimap(pointer) {
+        if (!this.visible) return false;
+        return (
+            pointer.x >= this.x &&
+            pointer.x <= this.x + this.width &&
+            pointer.y >= this.y &&
+            pointer.y <= this.y + this.height
+        );
+    }
+
     onMinimapClick(pointer) {
-        console.log('🎯🎯🎯 MINIMAP CLICK HANDLER FIRED! 🎯🎯🎯');
-        console.log('Minimap visible?', this.visible);
-        console.log('Background interactive?', this.background.input?.enabled);
-
-        if (!this.visible) {
-            console.log('❌ Minimap not visible, returning early');
-            return;
-        }
-
-        console.log('=== MINIMAP CLICK DEBUG - REAL POINTER VALUES ===');
-        console.log('REAL POINTER EVENT:', {
-            x: pointer.x,
-            y: pointer.y,
-            worldX: pointer.worldX,
-            worldY: pointer.worldY,
-            downX: pointer.downX,
-            downY: pointer.downY,
-            upX: pointer.upX,
-            upY: pointer.upY,
-            positionX: pointer.position?.x,
-            positionY: pointer.position?.y
-        });
-        console.log('Minimap position - this.x:', this.x, 'this.y:', this.y);
-        console.log('Minimap scale - this.scaleX:', this.scaleX, 'this.scaleY:', this.scaleY);
-
-        const camera = this.scene.cameras.main;
-        console.log('Camera before - scrollX:', camera.scrollX, 'scrollY:', camera.scrollY);
-
-        // For UI elements with setScrollFactor(0), pointer.x/y are in screen space
-        // Just need to convert from screen space to minimap local coordinates
+        // pointer.x/y are screen-space, which matches the minimap's fixed position
         const localX = pointer.x - this.x;
         const localY = pointer.y - this.y;
-        console.log('Calculated localX:', localX, 'localY:', localY);
 
         // Convert minimap coordinates to world coordinates
         const worldX = localX / this.scaleX;
         const worldY = localY / this.scaleY;
-        console.log('Calculated worldX:', worldX, 'worldY:', worldY);
 
         // Center camera on clicked position
+        const camera = this.scene.cameras.main;
         camera.centerOn(worldX, worldY);
-        console.log('Camera after - scrollX:', camera.scrollX, 'scrollY:', camera.scrollY);
-        console.log('=================================================');
     }
 
     toggle() {
