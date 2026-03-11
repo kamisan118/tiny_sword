@@ -88,7 +88,7 @@ export default class Tower extends Building {
             onComplete: () => {
                 arrow.destroy();
                 if (target.alive) {
-                    target.takeDamage(TOWER_DAMAGE);
+                    target.takeDamage(TOWER_DAMAGE, this);
                 }
             }
         });

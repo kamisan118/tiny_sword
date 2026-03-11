@@ -1,5 +1,9 @@
 import { GAME_WIDTH, GAME_HEIGHT, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, GRID_COLS, GRID_ROWS } from '../config/gameConfig.js';
-import { UnitState } from '../entities/Unit.js';
+
+const FRIENDLY_MARKER_COLOR = 0x4444ff;
+const HOSTILE_MARKER_COLOR = 0xff4444;
+const UNIT_MARKER_RADIUS = 2;
+const BUILDING_MARKER_RADIUS = 3;
 
 export default class Minimap {
     constructor(scene) {
@@ -131,49 +135,98 @@ export default class Minimap {
 
     renderUnits() {
         const graphics = this.scene.add.graphics();
+        const flashCycle = Math.floor(this.scene.time.now / 500) % 2; // 500ms cycle
 
         // Draw enemy units (red dots)
-        for (const unit of this.scene.enemyUnits) {
+        for (const unit of this.getLiveHostileUnits()) {
             if (!unit.alive) continue;
 
-            const minimapX = unit.x * this.scaleX;
-            const minimapY = unit.y * this.scaleY;
+            const position = this.getEntityWorldPosition(unit);
+            if (!position) continue;
 
-            graphics.fillStyle(0xff4444, 1);
-            graphics.fillCircle(minimapX, minimapY, 2);
+            this.drawMarker(graphics, position, HOSTILE_MARKER_COLOR, UNIT_MARKER_RADIUS);
         }
 
-        // Draw player units and buildings (blue dots, flash red when in combat)
-        const flashCycle = Math.floor(this.scene.time.now / 500) % 2; // 500ms cycle
+        // Draw player units (blue dots, flash red while under enemy attack)
         for (const unit of this.scene.playerUnits) {
             if (!unit.alive) continue;
 
-            const minimapX = unit.x * this.scaleX;
-            const minimapY = unit.y * this.scaleY;
+            const position = this.getEntityWorldPosition(unit);
+            if (!position) continue;
 
-            // Flash red if unit is attacking, otherwise stay blue
-            const isInCombat = unit.state === UnitState.ATTACKING;
-            const color = (isInCombat && flashCycle === 1) ? 0xff4444 : 0x4444ff;
-
-            graphics.fillStyle(color, 1);
-            graphics.fillCircle(minimapX, minimapY, 2);
+            this.drawMarker(graphics, position, this.getMarkerColor(unit, flashCycle), UNIT_MARKER_RADIUS);
         }
 
-        // Draw buildings (blue dots, slightly larger)
+        // Draw buildings (blue dots, slightly larger, flash red while under enemy attack)
         for (const building of this.scene.buildings) {
             if (!building.alive) continue;
 
-            const center = building.getCenter();
-            const minimapX = center.x * this.scaleX;
-            const minimapY = center.y * this.scaleY;
+            const position = this.getEntityWorldPosition(building);
+            if (!position) continue;
 
-            graphics.fillStyle(0x4444ff, 1);
-            graphics.fillCircle(minimapX, minimapY, 3);
+            this.drawMarker(graphics, position, this.getMarkerColor(building, flashCycle), BUILDING_MARKER_RADIUS);
         }
 
         // Render units to texture
         this.renderTexture.draw(graphics, 0, 0);
         graphics.destroy();
+    }
+
+    getLiveHostileUnits() {
+        const hostileUnits = [];
+        const seenUnits = new Set();
+        const addUnit = (unit) => {
+            if (!unit || !unit.alive || unit.faction !== 'enemy' || seenUnits.has(unit)) {
+                return;
+            }
+
+            seenUnits.add(unit);
+            hostileUnits.push(unit);
+        };
+
+        for (const unit of this.scene.enemyUnits ?? []) {
+            addUnit(unit);
+        }
+
+        for (const child of this.scene.children?.list ?? []) {
+            addUnit(child?.unitRef);
+        }
+
+        return hostileUnits;
+    }
+
+    getEntityWorldPosition(entity) {
+        if (entity.sprite) {
+            return { x: entity.sprite.x, y: entity.sprite.y };
+        }
+
+        if (typeof entity.getCenter === 'function') {
+            return entity.getCenter();
+        }
+
+        if (Number.isFinite(entity.x) && Number.isFinite(entity.y)) {
+            return { x: entity.x, y: entity.y };
+        }
+
+        return null;
+    }
+
+    getMarkerColor(entity, flashCycle) {
+        if (entity.faction === 'enemy') {
+            return HOSTILE_MARKER_COLOR;
+        }
+
+        const isUnderEnemyAttack = entity.minimapUnderAttackUntil > this.scene.time.now;
+        return isUnderEnemyAttack && flashCycle === 1 ? HOSTILE_MARKER_COLOR : FRIENDLY_MARKER_COLOR;
+    }
+
+    drawMarker(graphics, position, color, radius) {
+        const minimapX = Math.min(this.width - radius - 1, Math.max(radius, Math.round(position.x * this.scaleX)));
+        const minimapY = Math.min(this.height - radius - 1, Math.max(radius, Math.round(position.y * this.scaleY)));
+
+        graphics.fillStyle(color, 1);
+        graphics.fillCircle(minimapX, minimapY, radius);
+        graphics.fillRect(minimapX, minimapY, 1, 1);
     }
 
     updateViewportFrame() {

@@ -67,7 +67,7 @@ export default class Warrior extends Unit {
         this.playAnim('attack');
 
         if (this.attackTarget && this.attackTarget.alive) {
-            this.attackTarget.takeDamage(this.attackDamage);
+            this.attackTarget.takeDamage(this.attackDamage, this);
             if (!this.attackTarget.alive) {
                 this.attackTarget = null;
                 this.stopMoving();

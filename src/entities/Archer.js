@@ -93,7 +93,7 @@ export default class Archer extends Unit {
             onComplete: () => {
                 arrow.destroy();
                 if (target.alive) {
-                    target.takeDamage(this.attackDamage);
+                    target.takeDamage(this.attackDamage, this);
                     if (!target.alive) {
                         this.attackTarget = null;
                         this.stopMoving();

@@ -100,7 +100,7 @@ export default class GoblinTorch extends Unit {
         if (time - this.lastAttackTime < this.attackCooldown) return;
         this.lastAttackTime = time;
         if (this.attackTarget && this.attackTarget.alive) {
-            this.attackTarget.takeDamage(this.attackDamage);
+            this.attackTarget.takeDamage(this.attackDamage, this);
             if (!this.attackTarget.alive) {
                 this.attackTarget = null;
                 this.stopMoving();

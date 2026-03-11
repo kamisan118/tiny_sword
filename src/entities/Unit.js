@@ -37,6 +37,7 @@ export default class Unit {
         this.attackCooldown = config.attackCooldown || 1000;
         this.lastAttackTime = 0;
         this.attackTarget = null;
+        this.minimapUnderAttackUntil = 0;
 
         // Re-path throttle
         this.repathInterval = 300; // ms
@@ -328,8 +329,17 @@ export default class Unit {
         }
     }
 
-    takeDamage(amount) {
+    takeDamage(amount, attacker = null) {
         if (!this.alive) return;
+
+        if (attacker && attacker.faction === 'enemy' && this.faction === 'player') {
+            const underAttackDuration = Math.max(attacker.attackCooldown || 0, 500);
+            this.minimapUnderAttackUntil = Math.max(
+                this.minimapUnderAttackUntil,
+                this.scene.time.now + underAttackDuration
+            );
+        }
+
         this.hp = Math.max(0, this.hp - amount);
         if (this.hp <= 0) {
             this.die();

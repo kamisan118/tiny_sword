@@ -82,7 +82,7 @@ export default class GoblinTNT extends Unit {
 
         // Deal damage to target
         if (this.attackTarget && this.attackTarget.alive) {
-            this.attackTarget.takeDamage(this.attackDamage);
+            this.attackTarget.takeDamage(this.attackDamage, this);
         }
 
         // Self-destruct after animation
