@@ -11,32 +11,32 @@ export default class HUD {
         // --- Left: Gold display ---
         const pad = 16;
         scene.add.image(108 + pad, 30, 'ui_carved').setScale(1.15, 0.8)
-            .setScrollFactor(0).setDepth(999);
+            .setScrollFactor(0).setDepth(10060);
         scene.add.image(30 + pad, 30, 'ui_icon_coin').setScale(0.5)
-            .setScrollFactor(0).setDepth(1000);
+            .setScrollFactor(0).setDepth(10061);
         this.goldText = scene.add.text(58 + pad, 21, '100', style)
-            .setScrollFactor(0).setDepth(1000);
+            .setScrollFactor(0).setDepth(10061);
 
         // --- Left: Population display (next to gold) ---
         const popOffsetX = 220;
         scene.add.image(108 + pad + popOffsetX, 30, 'ui_carved').setScale(1.15, 0.8)
-            .setScrollFactor(0).setDepth(999);
+            .setScrollFactor(0).setDepth(10060);
         scene.add.image(30 + pad + popOffsetX, 30, 'ui_icon_sword').setScale(0.5)
-            .setScrollFactor(0).setDepth(1000);
+            .setScrollFactor(0).setDepth(10061);
         this.popText = scene.add.text(58 + pad + popOffsetX, 21, '0/10', style)
-            .setScrollFactor(0).setDepth(1000);
+            .setScrollFactor(0).setDepth(10061);
 
         // --- Center: Wave display ---
         scene.add.image(640, 28, 'ui_ribbon_yellow').setScale(1.3, 0.85)
-            .setScrollFactor(0).setDepth(999);
+            .setScrollFactor(0).setDepth(10060);
         this.waveText = scene.add.text(640, 24, t('waveCount', { wave: 0 }), { ...style, fontSize: '18px' })
-            .setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(1000);
+            .setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(10061);
 
         // --- Right: Timer display ---
         scene.add.image(1172 - pad, 30, 'ui_carved').setScale(1.15, 0.8)
-            .setScrollFactor(0).setDepth(999);
+            .setScrollFactor(0).setDepth(10060);
         this.timerText = scene.add.text(1245 - pad, 21, t('nextWave', { sec: 60 }), style)
-            .setOrigin(1, 0).setScrollFactor(0).setDepth(1000);
+            .setOrigin(1, 0).setScrollFactor(0).setDepth(10061);
 
         // Listen for gold changes
         eventBus.on('goldChanged', (gold) => {
